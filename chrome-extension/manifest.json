@@ -24,7 +24,8 @@
     "homepage_url": "http://www.javahelps.com/",
     "icons": {
         "32": "icon_32.png",
-        "48": "icon_48.png"
+        "48": "icon_48.png",
+        "128": "icon_128.png"
     },
     "manifest_version": 2,
     "minimum_chrome_version": "19.0",

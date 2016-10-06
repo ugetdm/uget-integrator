@@ -2,7 +2,9 @@
 // with Google Chrome in Linux systems.
 
 var enableExtension = true;
-var disp = '';
+var ugetWrapperNotFound = true;
+var interruptDownload = false;
+var disposition = '';
 var hostName = 'com.javahelps.ugetchromewrapper';
 var chromeVersion;
 var filter = [];
@@ -26,8 +28,10 @@ try {
     chromeVersion = 33;
 }
 chromeVersion = parseInt(chromeVersion);
-sendMessageToHost({ text: "Hello" });
-var interruptDownload = false;
+sendMessageToHost({ version: "1.0" });
+
+
+// Message format to send the download information to the uget-chrome-wrapper
 var message = {
     url: '',
     cookies: '',
@@ -37,6 +41,8 @@ var message = {
     referrer: '',
     postdata: ''
 };
+
+// Listen to the key press
 chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
     if (request.enableEXT == 'false')
         enableExtension = false;
@@ -44,10 +50,10 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
         enableExtension = true;
 });
 
+// Send message to the uget-chrome-wrapper
 function sendMessageToHost(message) {
-    console.log("Sending " + JSON.stringify(message));
     chrome.runtime.sendNativeMessage(hostName, message, function(response) {
-        // Do nothing
+        ugetWrapperNotFound = (response == null);
     });
 }
 
@@ -118,14 +124,23 @@ chrome.webRequest.onBeforeSendHeaders.addListener(function(details) {
     'requestHeaders'
 ]);
 chrome.webRequest.onHeadersReceived.addListener(function(details) {
-    if (details.statusLine.indexOf("200") < 0) {
+
+    if (ugetWrapperNotFound) {  // uget-chrome-wrapper not installed
         return {
             responseHeaders: details.responseHeaders
         };
     }
+
+    if (details.statusLine.indexOf("200") < 0) {    // HTTP response is not OK
+        return {
+            responseHeaders: details.responseHeaders
+        };
+    }
+
     interruptDownload = false;
     message.url = details.url;
     var contentType = "";
+
     for (var i = 0; i < details.responseHeaders.length; ++i) {
         if (details.responseHeaders[i].name.toLowerCase() == 'content-length') {
             message.filesize = details.responseHeaders[i].value;
@@ -135,11 +150,10 @@ chrome.webRequest.onHeadersReceived.addListener(function(details) {
                     responseHeaders: details.responseHeaders
                 };
             }
-
         } else if (details.responseHeaders[i].name.toLowerCase() == 'content-disposition') {
-            disp = details.responseHeaders[i].value;
-            if (disp.lastIndexOf('filename') != -1) {
-                message.filename = disp.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)[1];
+            disposition = details.responseHeaders[i].value;
+            if (disposition.lastIndexOf('filename') != -1) {
+                message.filename = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)[1];
                 message.filename = message.filename.replace(/["']/g, "");
                 interruptDownload = true;
             }
@@ -181,10 +195,10 @@ chrome.webRequest.onHeadersReceived.addListener(function(details) {
         message.postdata = '';
         var scheme = /^https/.test(details.url) ? 'https' : 'http';
         if (chromeVersion >= 35) {
-            return { redirectUrl: scheme + "://robwu.nl/204" };
+            return { redirectUrl: "javascript:" };
         } else if (details.frameId === 0) {
             chrome.tabs.update(details.tabId, {
-                url: scheme + '://robwu.nl/204'
+                url: "javascript:"
             });
             var responseHeaders = details.responseHeaders.filter(function(header) {
                 var name = header.name.toLowerCase();
