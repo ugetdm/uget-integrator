@@ -22,6 +22,6 @@
     "path": "/usr/bin/uget-chrome-wrapper",
     "type": "stdio",
     "allowed_origins": [
-        "chrome-extension://knldjmfmopnpolahpmmgbagdohdnhkik/"
+        "chrome-extension://efjgjleilhflffpbnkaofpmdnajdpepi/"
     ]
 }
