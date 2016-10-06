@@ -3,14 +3,35 @@ Integrate the famous FOSS uGet Download Manager with Google Chrome in Linux syst
 
 
 ## Installation
+**Method 1: From PPA**
+
 1: Add the PPA: `sudo add-apt-repository ppa:slgobinath/uget-chrome-wrapper`
 
-2: Install uget-chrome-wrapper: `sudo apt-get install uget-chrome-wrapper`
+2: Download the package list: `sudo apt update`
 
-3: Install uGet Integration extension to your Google Chrome.
+3: Install uget-chrome-wrapper: `sudo apt install uget-chrome-wrapper`
 
-Still, the extension is not published to the Chrome Webstore.
-Please install the extension manually, until the extension is published.
+4: Install [uGet Integration](https://chrome.google.com/webstore/detail/uget-integration/efjgjleilhflffpbnkaofpmdnajdpepi) extension to your Google Chrome.
+
+
+
+**Method 2: From Debian**
+
+1: Download and install the debian file from [here](http://ppa.launchpad.net/slgobinath/uget-chrome-wrapper/ubuntu/pool/main/u/uget-chrome-wrapper)
+
+2: Install [uGet Integration](https://chrome.google.com/webstore/detail/uget-integration/efjgjleilhflffpbnkaofpmdnajdpepi) extension to your Google Chrome.
+
+
+
+**Method 3: Manual Installation**
+
+1: Download the uget-chrome-wrapper to /usr/lib/bin: `sudo wget https://raw.githubusercontent.com/slgobinath/uget-chrome-wrapper/master/uget-chrome-wrapper/bin/uget-chrome-wrapper --output-document /usr/lib/bin/uget-chrome-wrapper`
+
+2: Create a new directory native-messaging-hosts if not exists: `sudo mkdir -p /etc/opt/chrome/native-messaging-hosts`
+
+3: Download the com.javahelps.ugetchromewrapper.json to that directory: `sudo wget https://raw.githubusercontent.com/slgobinath/uget-chrome-wrapper/master/uget-chrome-wrapper/conf/com.javahelps.ugetchromewrapper.json --output-document /etc/opt/chrome/native-messaging-hosts/com.javahelps.ugetchromewrapper.json`
+
+4: Install [uGet Integration](https://chrome.google.com/webstore/detail/uget-integration/efjgjleilhflffpbnkaofpmdnajdpepi) extension to your Google Chrome.
 
 ## Usage
 Simply click on any downloadable links to download the file. 'uGet new Download' dialog will appear and continue the download.
@@ -28,6 +49,10 @@ To disable uGet from interrupting your download, press <kbd>Insert</kbd> key and
 
 
 ## History
+Version 1.1:
+* Fix extension id mismatch
+* Fix %20 in filename
+
 Version 1.0:
 * Integrate uGet Download Manager with Google Chrome
 
