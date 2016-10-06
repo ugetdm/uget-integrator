@@ -58,7 +58,7 @@ def read_message():
 				cookie = data['cookies']
 				referer = data['referrer']
 				if not filename:
-					filename = basename(urlparse(url).path)
+					filename = basename(urlparse(url).path).replace("%20", " ")
 				if referer:
 					call(["uget-gtk", "--http-referer=" + referer, "--filename=" + filename, url])
 				else:
