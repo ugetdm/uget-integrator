@@ -28,7 +28,7 @@ try {
     chromeVersion = 33;
 }
 chromeVersion = parseInt(chromeVersion);
-sendMessageToHost({ version: "1.0" });
+sendMessageToHost({ version: "1.1.1" });
 
 
 // Message format to send the download information to the uget-chrome-wrapper
