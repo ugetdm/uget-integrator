@@ -131,7 +131,7 @@ chrome.webRequest.onHeadersReceived.addListener(function(details) {
         };
     }
 
-    if (details.statusLine.indexOf("200") < 0) {    // HTTP response is not OK
+    if (!details.statusLine.includes("200")) {    // HTTP response is not OK
         return {
             responseHeaders: details.responseHeaders
         };
@@ -140,6 +140,12 @@ chrome.webRequest.onHeadersReceived.addListener(function(details) {
     interruptDownload = false;
     message.url = details.url;
     var contentType = "";
+
+    if (details.url.includes("//docs.google.com/")) {    // Cannot download from Google Docs
+        return {
+            responseHeaders: details.responseHeaders
+        };
+    }
 
     for (var i = 0; i < details.responseHeaders.length; ++i) {
         if (details.responseHeaders[i].name.toLowerCase() == 'content-length') {
