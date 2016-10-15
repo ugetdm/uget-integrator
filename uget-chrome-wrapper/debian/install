@@ -1,3 +1,0 @@
-bin/uget-chrome-wrapper /usr/bin
-conf/com.javahelps.ugetchromewrapper.json /etc/opt/chrome/native-messaging-hosts
-conf/com.javahelps.ugetchromewrapper.json /etc/chromium/native-messaging-hosts
