@@ -16,6 +16,10 @@ If you do not have [uGet](http://ugetdm.com/) Download Manager, install the late
 
 ### Installing uget-chrome-wrapper
 
+***
+
+#### Linux:
+
 **Method 1: From PPA**
 
 1: Add the PPA: `sudo add-apt-repository ppa:slgobinath/uget-chrome-wrapper`
@@ -52,6 +56,21 @@ If you do not have [uGet](http://ugetdm.com/) Download Manager, install the late
 
 5: Restart the browser
 
+
+***
+
+#### Windows:
+1: Download and install [Python 2.7](https://www.python.org/downloads/release/python-2712/)
+
+2: Add uGet to the system path [Screenshot](https://github.com/slgobinath/uget-chrome-wrapper/blob/master/build/windows/add_uget_to_path.png)
+
+3: Download and install [uget-chrome-wrapper](https://github.com/slgobinath/uget-chrome-wrapper/releases/download/v1.2/uget-chrome-wrapper_1.2.1.exe)
+
+4: Install [uGet Integration](https://chrome.google.com/webstore/detail/uget-integration/efjgjleilhflffpbnkaofpmdnajdpepi) extension to your browser.
+
+5: Restart the browser
+
+> Please note that this is my leisure time project. Even though I will continue development and bug fixes, Windows is not my targeted operating system. Even for the first release, I installed the trial version of Windows in Virtual Box and created the setup file. Therefore there may be delays in releasing the bug fixes and new features to Windows users.
 
 ## Usage
 Simply click on any downloadable links to download the file. 'uGet new Download' dialog will appear and continue the download.
