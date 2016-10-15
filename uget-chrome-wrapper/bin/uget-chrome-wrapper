@@ -28,6 +28,16 @@ import json
 from urlparse import urlparse
 from os.path import splitext, basename, join, expanduser
 
+UGET_COMMAND = "uget-gtk"
+
+# Platform specific configuration
+if sys.platform == "win32":
+	# Set the default I/O mode to O_BINARY in windows
+	import os, msvcrt
+	msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
+	msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
+	UGET_COMMAND = "uget"
+
 # Send a message to the webapp.
 def send_message(message):
 	# Write message size.
@@ -49,7 +59,7 @@ def read_message():
 		text = sys.stdin.read(text_length).decode('utf-8')
 
 		if text:
-			send_message('{"enable": true, "ignorelist": ""}')
+			send_message('{"enable": true}')
 			data = json.loads(text)
 			url = data['url']
 			
@@ -60,9 +70,9 @@ def read_message():
 				if not filename:
 					filename = basename(urlparse(url).path).replace("%20", " ")
 				if referer:
-					call(["uget-gtk", "--http-referer=" + referer, "--filename=" + filename, url])
+					call([UGET_COMMAND, "--http-referer=" + referer, "--filename=" + filename, url])
 				else:
-					call(["uget-gtk", "--filename=" + filename, url])
+					call([UGET_COMMAND, "--filename=" + filename, url])
 			
 			sys.exit(0)
 
