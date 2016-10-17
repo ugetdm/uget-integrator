@@ -33,7 +33,6 @@ If you do not have [uGet](http://ugetdm.com/) Download Manager, install the late
 5: Restart the browser
 
 
-
 **Method 2: From Debian**
 
 1: Download and install the debian file from [here](http://ppa.launchpad.net/slgobinath/uget-chrome-wrapper/ubuntu/pool/main/u/uget-chrome-wrapper)
@@ -46,11 +45,21 @@ If you do not have [uGet](http://ugetdm.com/) Download Manager, install the late
 
 **Method 3: Manual Installation**
 
-1: Download the uget-chrome-wrapper to /usr/lib/bin: `sudo wget https://raw.githubusercontent.com/slgobinath/uget-chrome-wrapper/master/uget-chrome-wrapper/bin/uget-chrome-wrapper --output-document /usr/lib/bin/uget-chrome-wrapper`
+1: Download the uget-chrome-wrapper to /usr/bin: `sudo wget https://raw.githubusercontent.com/slgobinath/uget-chrome-wrapper/master/uget-chrome-wrapper/bin/uget-chrome-wrapper --output-document /usr/bin/uget-chrome-wrapper`
 
-2: Create a new directory native-messaging-hosts if not exists: `sudo mkdir -p /etc/opt/chrome/native-messaging-hosts`
+2: Make the uget-chrome-wrapper executable: `sudo chmod +x /usr/bin/uget-chrome-wrapper`
 
-3: Download the com.javahelps.ugetchromewrapper.json to that directory: `sudo wget https://raw.githubusercontent.com/slgobinath/uget-chrome-wrapper/master/uget-chrome-wrapper/conf/com.javahelps.ugetchromewrapper.json --output-document /etc/opt/chrome/native-messaging-hosts/com.javahelps.ugetchromewrapper.json`
+*For Google Chrome:*
+
+3.1: Create a new directory native-messaging-hosts if not exists: `sudo mkdir -p /etc/opt/chrome/native-messaging-hosts`
+
+3.2: Download the com.javahelps.ugetchromewrapper.json to that directory: `sudo wget https://raw.githubusercontent.com/slgobinath/uget-chrome-wrapper/master/uget-chrome-wrapper/conf/com.javahelps.ugetchromewrapper.json --output-document /etc/opt/chrome/native-messaging-hosts/com.javahelps.ugetchromewrapper.json`
+
+*For Chromium and Vivaldi:*
+
+3.1: Create a new directory native-messaging-hosts if not exists: `sudo mkdir -p /etc/chromium/native-messaging-hosts`
+
+3.2: Download the com.javahelps.ugetchromewrapper.json to that directory: `sudo wget https://raw.githubusercontent.com/slgobinath/uget-chrome-wrapper/master/uget-chrome-wrapper/conf/com.javahelps.ugetchromewrapper.json --output-document /etc/chromium/native-messaging-hosts/com.javahelps.ugetchromewrapper.json`
 
 4: Install [uGet Integration](https://chrome.google.com/webstore/detail/uget-integration/efjgjleilhflffpbnkaofpmdnajdpepi) extension to your browser.
 
@@ -77,6 +86,9 @@ Simply click on any downloadable links to download the file. 'uGet new Download'
 
 To disable uGet from interrupting your download, press <kbd>Insert</kbd> key and click on the link.
 
+## Tested Environments
+ - Linux Mint 18, uGet 2.0.8, Google Chrome 54.0.2840.59 (PPA installation)
+ - Arch Anywhere 2.2.3, uGet 2.0.8, Vivaldi 1.4.589.38 (Manual installation)
 
 ## Contributing
 **Are you a user?**
