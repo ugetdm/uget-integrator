@@ -88,7 +88,9 @@ To disable uGet from interrupting your download, press <kbd>Insert</kbd> key and
 
 ## Tested Environments
  - Linux Mint 18, uGet 2.0.8, Google Chrome 54.0.2840.59 (PPA installation)
+ - Linux Mint 18, uGet 2.0.8, Vivaldi 1.4.589.38 (PPA installation)
  - Arch Anywhere 2.2.3, uGet 2.0.8, Vivaldi 1.4.589.38 (Manual installation)
+ - Windows 8.1, uGet 2.0.8, Google Chrome 54.0.2840.59
 
 ## Contributing
 **Are you a user?**
