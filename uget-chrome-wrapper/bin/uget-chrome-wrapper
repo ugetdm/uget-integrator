@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 # uget-chrome-wrapper is a tool to integrate uGet Download manager
 # with Google Chrome in Linux systems.
@@ -22,7 +22,6 @@
 import struct
 import sys
 import threading
-import Queue
 from subprocess import call
 import json
 from urlparse import urlparse
