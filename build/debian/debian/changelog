@@ -1,4 +1,6 @@
-uget-chrome-wrapper (1.2-1) xenial; urgency=medium
+uget-chrome-wrapper (1.3.0-1) xenial; urgency=medium
+
+  * Downgrading Python dependency
 
   * Adding support for Chromium and Vivaldi
   

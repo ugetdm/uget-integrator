@@ -4,10 +4,10 @@ Priority: optional
 Maintainer: Loganathan Gobinath <slgobinath@gmail.com>
 Build-Depends: debhelper (>= 9)
 Standards-Version: 3.9.6
-Homepage: https://github.com/slgobinath/uget-chrome-wrapper
+Homepage: https://slgobinath.github.io/uget-chrome-wrapper/
 
 Package: uget-chrome-wrapper
 Architecture: any
-Depends: uget (>= 2.0.2), python (>= 2.7.6)
+Depends: uget (>= 2.0.2), python (>= 2.7.0)
 Description: uGet Download Manager
  Integrate uGet Download manager with Google Chrome
