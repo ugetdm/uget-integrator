@@ -1,96 +1,17 @@
 # uGet Chrome Wrapper
 Integrate the famous FOSS uGet Download Manager with Google Chrome in Linux systems. With this tool, uGet can interrupt and catch your downloads from Google Chrome.
 
+For more details, visit the official page: [uGet Chrome Wrapper](https://slgobinath.github.io/uget-chrome-wrapper/)
 
 ## Installation
-### Installing uGet Download Manager
 
-If you do not have [uGet](http://ugetdm.com/) Download Manager, install the latest version using the following commands.
-
-1: Add the PPA: `sudo add-apt-repository ppa:plushuang-tw/uget-stable`
-
-2: Download the package list: `sudo apt update`
-
-3: Install uget: `sudo apt install uget`
-
-
-### Installing uget-chrome-wrapper
-
-***
-
-#### Linux:
-
-**Method 1: From PPA**
-
-1: Add the PPA: `sudo add-apt-repository ppa:slgobinath/uget-chrome-wrapper`
-
-2: Download the package list: `sudo apt update`
-
-3: Install uget-chrome-wrapper: `sudo apt install uget-chrome-wrapper`
-
-4: Install [uGet Integration](https://chrome.google.com/webstore/detail/uget-integration/efjgjleilhflffpbnkaofpmdnajdpepi) extension to your browser.
-
-5: Restart the browser
-
-
-**Method 2: From Debian**
-
-1: Download and install the debian file from [here](http://ppa.launchpad.net/slgobinath/uget-chrome-wrapper/ubuntu/pool/main/u/uget-chrome-wrapper)
-
-2: Install [uGet Integration](https://chrome.google.com/webstore/detail/uget-integration/efjgjleilhflffpbnkaofpmdnajdpepi) extension to your browser.
-
-3: Restart the browser
-
-
-
-**Method 3: Manual Installation**
-
-1: Download the uget-chrome-wrapper to /usr/bin: `sudo wget https://raw.githubusercontent.com/slgobinath/uget-chrome-wrapper/master/uget-chrome-wrapper/bin/uget-chrome-wrapper --output-document /usr/bin/uget-chrome-wrapper`
-
-2: Make the uget-chrome-wrapper executable: `sudo chmod +x /usr/bin/uget-chrome-wrapper`
-
-*For Google Chrome:*
-
-3.1: Create a new directory native-messaging-hosts if not exists: `sudo mkdir -p /etc/opt/chrome/native-messaging-hosts`
-
-3.2: Download the com.javahelps.ugetchromewrapper.json to that directory: `sudo wget https://raw.githubusercontent.com/slgobinath/uget-chrome-wrapper/master/uget-chrome-wrapper/conf/com.javahelps.ugetchromewrapper.json --output-document /etc/opt/chrome/native-messaging-hosts/com.javahelps.ugetchromewrapper.json`
-
-*For Chromium and Vivaldi:*
-
-3.1: Create a new directory native-messaging-hosts if not exists: `sudo mkdir -p /etc/chromium/native-messaging-hosts`
-
-3.2: Download the com.javahelps.ugetchromewrapper.json to that directory: `sudo wget https://raw.githubusercontent.com/slgobinath/uget-chrome-wrapper/master/uget-chrome-wrapper/conf/com.javahelps.ugetchromewrapper.json --output-document /etc/chromium/native-messaging-hosts/com.javahelps.ugetchromewrapper.json`
-
-4: Install [uGet Integration](https://chrome.google.com/webstore/detail/uget-integration/efjgjleilhflffpbnkaofpmdnajdpepi) extension to your browser.
-
-5: Restart the browser
-
-
-***
-
-#### Windows:
-1: Download and install [Python 2.7](https://www.python.org/downloads/release/python-2712/)
-
-2: Add uGet to the system path [Screenshot](https://github.com/slgobinath/uget-chrome-wrapper/blob/master/build/windows/add_uget_to_path.png)
-
-3: Download and install [uget-chrome-wrapper](https://github.com/slgobinath/uget-chrome-wrapper/releases/download/v1.2/uget-chrome-wrapper_1.2.1.exe)
-
-4: Install [uGet Integration](https://chrome.google.com/webstore/detail/uget-integration/efjgjleilhflffpbnkaofpmdnajdpepi) extension to your browser.
-
-5: Restart the browser
-
-> Please note that this is my leisure time project. Even though I will continue development and bug fixes, Windows is not my targeted operating system. Even for the first release, I installed the trial version of Windows in Virtual Box and created the setup file. Therefore there may be delays in releasing the bug fixes and new features to Windows users.
+To see how to install, visit the [installation guide](https://slgobinath.github.io/uget-chrome-wrapper/#installation) and click on your operating system.
 
 ## Usage
 Simply click on any downloadable links to download the file. 'uGet new Download' dialog will appear and continue the download.
 
 To disable uGet from interrupting your download, press <kbd>Insert</kbd> key and click on the link.
 
-## Tested Environments
- - Linux Mint 18, uGet 2.0.8, Google Chrome 54.0.2840.59 (PPA installation)
- - Linux Mint 18, uGet 2.0.8, Vivaldi 1.4.589.38 (PPA installation)
- - Arch Anywhere 2.2.3, uGet 2.0.8, Vivaldi 1.4.589.38 (Manual installation)
- - Windows 8.1, uGet 2.0.8, Google Chrome 54.0.2840.59
 
 ## Contributing
 **Are you a user?**
