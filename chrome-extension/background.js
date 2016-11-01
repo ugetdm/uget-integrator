@@ -28,7 +28,7 @@ try {
     chromeVersion = 33;
 }
 chromeVersion = parseInt(chromeVersion);
-sendMessageToHost({ version: "1.1.1" });
+sendMessageToHost({ version: "1.1.2" });
 
 
 // Message format to send the download information to the uget-chrome-wrapper
@@ -137,15 +137,15 @@ chrome.webRequest.onHeadersReceived.addListener(function(details) {
         };
     }
 
-    interruptDownload = false;
-    message.url = details.url;
-    var contentType = "";
-
-    if (details.url.includes("//docs.google.com/")) {    // Cannot download from Google Docs
+    if (details.url.includes("//docs.google.com/") || details.url.includes("googleusercontent.com/docs")) {    // Cannot download from Google Docs
         return {
             responseHeaders: details.responseHeaders
         };
     }
+
+    interruptDownload = false;
+    message.url = details.url;
+    var contentType = "";
 
     for (var i = 0; i < details.responseHeaders.length; ++i) {
         if (details.responseHeaders[i].name.toLowerCase() == 'content-length') {
