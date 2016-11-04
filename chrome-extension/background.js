@@ -28,7 +28,7 @@ try {
     chromeVersion = 33;
 }
 chromeVersion = parseInt(chromeVersion);
-sendMessageToHost({ version: "1.1.2" });
+sendMessageToHost({ version: "1.1.3" });
 
 
 // Message format to send the download information to the uget-chrome-wrapper
@@ -73,6 +73,27 @@ function postParams(source) {
     }
     return array.join('&');
 }
+
+// Add to Chrome context menu
+chrome.contextMenus.create(
+    {
+        title: 'Download with uGet',
+        id: "download_with_uget",
+        contexts: ['link']
+    }
+);
+
+chrome.contextMenus.onClicked.addListener(function (info, tab) {
+    "use strict";
+    if (info.menuItemId === "download_with_uget") {
+    	clearMessage();
+    	message.url = info['linkUrl'];
+    	message.referrer = info['pageUrl'];
+    	sendMessageToHost(message);
+    	clearMessage();
+    }
+});
+
 chrome.webRequest.onBeforeRequest.addListener(function(details) {
     if (details.method == 'POST') {
         message.postdata = postParams(details.requestBody.formData);
