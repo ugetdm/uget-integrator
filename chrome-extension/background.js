@@ -28,7 +28,7 @@ try {
     chromeVersion = 33;
 }
 chromeVersion = parseInt(chromeVersion);
-sendMessageToHost({ version: "1.1.3" });
+sendMessageToHost({ version: "1.1.4" });
 
 
 // Message format to send the download information to the uget-chrome-wrapper
@@ -75,23 +75,60 @@ function postParams(source) {
 }
 
 // Add to Chrome context menu
-chrome.contextMenus.create(
-    {
-        title: 'Download with uGet',
-        id: "download_with_uget",
-        contexts: ['link']
-    }
-);
+chrome.contextMenus.create({
+    title: 'Download with uGet',
+    id: "download_with_uget",
+    contexts: ['link']
+});
 
-chrome.contextMenus.onClicked.addListener(function (info, tab) {
+chrome.contextMenus.onClicked.addListener(function(info, tab) {
     "use strict";
     if (info.menuItemId === "download_with_uget") {
-    	clearMessage();
-    	message.url = info['linkUrl'];
-    	message.referrer = info['pageUrl'];
-    	sendMessageToHost(message);
-    	clearMessage();
+        clearMessage();
+        message.url = info['linkUrl'];
+        message.referrer = info['pageUrl'];
+        sendMessageToHost(message);
+        clearMessage();
     }
+});
+
+// Interrupt Google Chrome download
+chrome.downloads.onCreated.addListener(function(downloadItem) {
+
+    if (ugetWrapperNotFound) { // uget-chrome-wrapper not installed
+        return;
+    }
+
+    var fileSize = downloadItem['fileSize'];
+
+    if (fileSize != -1 && fileSize < 300000) { // 300 kb
+        return;
+    }
+
+    var url = '';
+    if (chromeVersion >= 54) {
+        url = downloadItem['finalUrl'];
+    } else {
+        url = downloadItem['url'];
+    }
+
+    if (!url) {
+        return;
+    }
+
+    if (url.includes("//docs.google.com/") || url.includes("googleusercontent.com/docs")) { // Cannot download from Google Docs
+        return;
+    }
+
+    chrome.downloads.cancel(downloadItem.id); // Cancel the download
+    chrome.downloads.erase({ id: downloadItem.id }); // Erase the download from list
+
+    clearMessage();
+    message.url = url;
+    message.filename = downloadItem['filename'];
+    message.filesize = fileSize;
+    message.referrer = downloadItem['referrer'];
+    sendMessageToHost(message);
 });
 
 chrome.webRequest.onBeforeRequest.addListener(function(details) {
@@ -146,19 +183,19 @@ chrome.webRequest.onBeforeSendHeaders.addListener(function(details) {
 ]);
 chrome.webRequest.onHeadersReceived.addListener(function(details) {
 
-    if (ugetWrapperNotFound) {  // uget-chrome-wrapper not installed
+    if (ugetWrapperNotFound) { // uget-chrome-wrapper not installed
         return {
             responseHeaders: details.responseHeaders
         };
     }
 
-    if (!details.statusLine.includes("200")) {    // HTTP response is not OK
+    if (!details.statusLine.includes("200")) { // HTTP response is not OK
         return {
             responseHeaders: details.responseHeaders
         };
     }
 
-    if (details.url.includes("//docs.google.com/") || details.url.includes("googleusercontent.com/docs")) {    // Cannot download from Google Docs
+    if (details.url.includes("//docs.google.com/") || details.url.includes("googleusercontent.com/docs")) { // Cannot download from Google Docs
         return {
             responseHeaders: details.responseHeaders
         };
