@@ -1,13 +1,31 @@
-// uget-chrome-wrapper is an extension to integrate uGet Download manager
-// with Google Chrome in Linux systems.
+/*
+* uget-chrome-wrapper is an extension to integrate uGet Download manager
+* with Google Chrome, Chromium and Vivaldi in Linux and Windows.
+*
+* Copyright (C) 2016  Gobinath
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
-var enableExtension = true;
+var interruptDownloads = true;
 var ugetWrapperNotFound = true;
 var interruptDownload = false;
 var disposition = '';
 var hostName = 'com.javahelps.ugetchromewrapper';
 var chromeVersion;
 var filter = [];
+var keywords = [];
 var requestList = [{
     cookies: '',
     postdata: '',
@@ -28,9 +46,22 @@ try {
     chromeVersion = 33;
 }
 chromeVersion = parseInt(chromeVersion);
-sendMessageToHost({ version: "1.1.4" });
+sendMessageToHost({ version: "1.1.6" });
+
+if (localStorage["uget-keywords"]) {
+    keywords = localStorage["uget-keywords"].split(/[\s,]+/);
+} else {
+	localStorage["uget-keywords"] = '';
+}
 
 
+if (!localStorage["uget-interrupt"]) {
+    localStorage["uget-interrupt"] = 'true';
+} else {
+    var interrupt = (localStorage["uget-interrupt"] == "true");
+    setInterruptDownload(interrupt);
+}
+console.log(localStorage["uget-interrupt"]);
 // Message format to send the download information to the uget-chrome-wrapper
 var message = {
     url: '',
@@ -44,10 +75,17 @@ var message = {
 
 // Listen to the key press
 chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
-    if (request.enableEXT == 'false')
-        enableExtension = false;
-    else
-        enableExtension = true;
+    var msg = request.message;
+    if(msg === 'enable') {
+        // Temporarily enable
+        setInterruptDownload(true);
+    } else if(msg == 'disable') {
+        // Temporarily disable
+        setInterruptDownload(false);
+    } else {
+        // Toggle
+        setInterruptDownload(!interruptDownloads, true);
+    }
 });
 
 // Send message to the uget-chrome-wrapper
@@ -95,7 +133,7 @@ chrome.contextMenus.onClicked.addListener(function(info, tab) {
 // Interrupt Google Chrome download
 chrome.downloads.onCreated.addListener(function(downloadItem) {
 
-    if (ugetWrapperNotFound) { // uget-chrome-wrapper not installed
+    if (ugetWrapperNotFound || !interruptDownloads) { // uget-chrome-wrapper not installed
         return;
     }
 
@@ -116,7 +154,7 @@ chrome.downloads.onCreated.addListener(function(downloadItem) {
         return;
     }
 
-    if (url.includes("//docs.google.com/") || url.includes("googleusercontent.com/docs")) { // Cannot download from Google Docs
+    if (isBlackListed(url)) {
         return;
     }
 
@@ -195,7 +233,7 @@ chrome.webRequest.onHeadersReceived.addListener(function(details) {
         };
     }
 
-    if (details.url.includes("//docs.google.com/") || details.url.includes("googleusercontent.com/docs")) { // Cannot download from Google Docs
+    if (isBlackListed(details.url)) {
         return {
             responseHeaders: details.responseHeaders
         };
@@ -237,7 +275,7 @@ chrome.webRequest.onHeadersReceived.addListener(function(details) {
             }
         }
     }
-    if (interruptDownload == true && enableExtension == true) {
+    if (interruptDownload == true && interruptDownloads == true) {
         for (var i = 0; i < filter.length; i++) {
             if (filter[i] != "" && contentType.lastIndexOf(filter[i]) != -1) {
                 return {
@@ -284,7 +322,7 @@ chrome.webRequest.onHeadersReceived.addListener(function(details) {
             cancel: true
         };
     }
-    enableExtension == true;
+    interruptDownloads == true;
     clearMessage();
     return {
         responseHeaders: details.responseHeaders
@@ -301,3 +339,32 @@ chrome.webRequest.onHeadersReceived.addListener(function(details) {
     'responseHeaders',
     'blocking'
 ]);
+
+function updateKeywords(data) {
+    keywords = data.split(/[\s,]+/);
+};
+
+function isBlackListed(url) {
+    if (url.includes("//docs.google.com/") || url.includes("googleusercontent.com/docs")) { // Cannot download from Google Docs
+        return true;
+    }
+    for (keyword of keywords) {
+        if (url.includes(keyword)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
+function setInterruptDownload(interrupt, writeToStorage) {
+    interruptDownloads = interrupt;
+    if (interrupt) {
+        chrome.browserAction.setIcon({ path: "./icon_32.png" });
+    } else {
+        chrome.browserAction.setIcon({ path: "./icon_disabled_32.png" });
+    }
+    if(writeToStorage) {
+        localStorage["uget-interrupt"] = interrupt.toString();
+    }
+}
