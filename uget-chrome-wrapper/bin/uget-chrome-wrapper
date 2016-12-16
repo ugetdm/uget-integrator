@@ -57,7 +57,7 @@ def extract_file_name(url):
 			if mime:
 				fileName += guess_extension(mime)
 	else:
-		fileName = basename(urlparse(url).path)
+		fileName = basename(urlparse(url).path).replace('%20', ' ')
 
 	return fileName
 
