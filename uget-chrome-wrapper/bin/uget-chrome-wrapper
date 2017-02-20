@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 # uget-chrome-wrapper is a tool to integrate uGet Download manager
 # with Google Chrome in Linux systems.
@@ -18,33 +18,34 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-import struct
-import sys
-import threading
+# sudo apt install python3-urllib3
+import struct, sys, threading, logging, json, urllib
 from subprocess import call
-import json
-from urlparse import urlparse
+from urllib.parse import urlparse
 from os.path import splitext, basename, join, expanduser
-import urllib2
 from mimetypes import guess_extension
 
 UGET_COMMAND = "uget-gtk"
 VERSION = "1.3.4"
 
+logger = logging.getLogger()
+# log_file_path = join(expanduser('~'), 'uget-chrome-wrapper.log')
+# logging.basicConfig(format='%(asctime)s [%(levelname)s]: %(message)s', filename=log_file_path, filemode='a', level=logging.DEBUG)
+logger.propagate = False
+
 # Platform specific configuration
-if sys.platform == "win32":
+if sys.platform == 'win32':
 	# Set the default I/O mode to O_BINARY in windows
 	import os, msvcrt
 	msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
 	msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
-	UGET_COMMAND = "uget"
+	UGET_COMMAND = 'uget'
 
 def extract_file_name(url):
 	fileName = ''
-	if "googlevideo.com/" in url and '&title=' in url:
+	if 'googlevideo.com/' in url and '&title=' in url:
 		# Youtube video
-		url = urllib2.unquote(url)
+		url = urllib.unquote(url)
 		url_components = url.split('&')
 		for smt in url_components:
 			if smt.startswith('title='):
@@ -63,23 +64,36 @@ def extract_file_name(url):
 
 # Send a message to the webapp.
 def send_message(message):
-	# Write message size.
-	sys.stdout.write(struct.pack('I', len(message)))
-	# Write the message itself.
-	sys.stdout.write(message)
-	sys.stdout.flush()
+
+	logger.info('Sending message: ' + str(message))
+
+	try:
+		# Write message size.
+		sys.stdout.buffer.write(struct.pack('I', len(message)))
+		# Write the message itself.
+		sys.stdout.write(message)
+		sys.stdout.flush()
+	except Exception as e:
+		logger.error('Error in sending message: ' + str(e))
 
 # Read messages from the webapp.
 def read_message():
+	
+	logger.info('uget-chrome-wrapper is reading the message')
+
 	while 1:
 		# Read the message length (first 4 bytes).
-		text_length_bytes = sys.stdin.read(4)
+		text_length_bytes = sys.stdin.buffer.read(4)
 
 		# Unpack message length as 4 byte integer.
 		text_length = struct.unpack('i', text_length_bytes)[0]
 
+		logger.debug('Message length: ' + str(text_length))
+
 		# Read the text (JSON object) of the message.
-		text = sys.stdin.read(text_length).decode('utf-8')
+		text = sys.stdin.buffer.read(text_length).decode('utf-8')
+
+		logger.debug('Received message: ' + str(text))
 
 		if text:
 			if not 'url' in text:
