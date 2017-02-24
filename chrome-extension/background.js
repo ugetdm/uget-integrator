@@ -1,6 +1,6 @@
 /*
 * uget-chrome-wrapper is an extension to integrate uGet Download manager
-* with Google Chrome, Chromium and Vivaldi in Linux and Windows.
+* with Google Chrome, Chromium, Vivaldi and Opera in Linux and Windows.
 *
 * Copyright (C) 2016  Gobinath
 *
@@ -23,6 +23,8 @@ var ugetWrapperNotFound = true;
 var interruptDownload = false;
 var disposition = '';
 var hostName = 'com.javahelps.ugetchromewrapper';
+var ugetChromeWrapperVersion;
+var ugetVersion;
 var chromeVersion;
 var filter = [];
 var keywords = [];
@@ -46,7 +48,7 @@ try {
     chromeVersion = 33;
 }
 chromeVersion = parseInt(chromeVersion);
-sendMessageToHost({ version: "1.1.6" });
+sendMessageToHost({ version: "2.0.0" });
 
 if (localStorage["uget-keywords"]) {
     keywords = localStorage["uget-keywords"].split(/[\s,]+/);
@@ -91,9 +93,22 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
 function sendMessageToHost(message) {
     chrome.runtime.sendNativeMessage(hostName, message, function(response) {
         ugetWrapperNotFound = (response == null);
+        if(!ugetWrapperNotFound) {
+            ugetChromeWrapperVersion = response.version;
+            ugetVersion = response.uget;
+        }
     });
 }
 
+function getInfo() {
+	 if(ugetWrapperNotFound) {
+	 	return "<font color='red'>Error: Unable to connect to the uget-chrome-wrapper</font>";
+	 } else if(!ugetChromeWrapperVersion.startsWith("2.")) {
+	 	return "<font color='orange'>Warning: Please update the uget-chrome-wrapper to the latest version</font>";
+	 } else {
+	 	return "<font color='green'>Info: Found uGet: " + ugetVersion + " and uget-chrome-wrapper: " + ugetChromeWrapperVersion + "</font>";
+	 }
+}
 function clearMessage() {
     message.url = '';
     message.cookies = '';

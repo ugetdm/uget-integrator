@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # uget-chrome-wrapper is a tool to integrate uGet Download manager
-# with Google Chrome in Linux systems.
+# with Google Chrome, Chromium, Vivaldi and Opera in Linux and Windows.
 
 # Copyright (C) 2016  Gobinath
 
@@ -19,14 +19,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # sudo apt install python3-urllib3
-import struct, sys, threading, logging, json, urllib
-from subprocess import call
+import struct, sys, threading, logging, json, urllib, subprocess
 from urllib.parse import urlparse
 from os.path import splitext, basename, join, expanduser
 from mimetypes import guess_extension
 
 UGET_COMMAND = "uget-gtk"
-VERSION = "1.3.4"
+VERSION = "2.0.0"
 
 logger = logging.getLogger()
 # log_file_path = join(expanduser('~'), 'uget-chrome-wrapper.log')
@@ -99,7 +98,10 @@ def read_message():
 
 		if text:
 			if not 'url' in text:
-				send_message('{"enable": true, "version": "' + VERSION + '"}')
+				uget_version = subprocess.run(UGET_COMMAND + " --version", shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout;
+				uget_version = uget_version.replace('uGet', '').replace('for GTK+', '').strip()
+				logger.debug('uGet version: ' + uget_version)
+				send_message('{"enable": true, "version": "' + VERSION + '", "uget": "' + uget_version + '"}')
 				return
 			
 			send_message('{"state": "accepted"}')
@@ -113,9 +115,9 @@ def read_message():
 				if not filename:
 					filename = extract_file_name(url)
 				if referer:
-					call([UGET_COMMAND, "--http-referer=" + referer, "--filename=" + filename, url])
+					subprocess.call([UGET_COMMAND, "--http-referer=" + referer, "--filename=" + filename, url])
 				else:
-					call([UGET_COMMAND, "--filename=" + filename, url])
+					subprocess.call([UGET_COMMAND, "--filename=" + filename, url])
 			
 			sys.exit(0)
 

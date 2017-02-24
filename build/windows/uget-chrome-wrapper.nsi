@@ -1,5 +1,5 @@
 ; uget-chrome-wrapper is a tool to integrate uGet Download manager
-; with Google Chrome in Linux systems.
+; with Google Chrome, Chromium, Vivaldi and Opera in Linux and Windows.
 
 ; Copyright (C) 2016  Gobinath
 
@@ -148,7 +148,7 @@ Section "uget-chrome-wrapper (required)"
 
 	; Update the json file
 	FileOpen $9 $INSTDIR\com.javahelps.ugetchromewrapper.json w ;Opens a Empty File an fills it
-	FileWrite $9 '{"name":"com.javahelps.ugetchromewrapper","description":"Integrate uGet with Google Chrome","path":"$0\\uget-chrome-wrapper.py","type":"stdio","allowed_origins":["chrome-extension://efjgjleilhflffpbnkaofpmdnajdpepi/"]}$\r$\n'
+	FileWrite $9 '{"name":"com.javahelps.ugetchromewrapper","description":"Integrate uGet with Google Chrome","path":"$0\\uget-chrome-wrapper.py","type":"stdio","allowed_origins":["chrome-extension://efjgjleilhflffpbnkaofpmdnajdpepi/","chrome-extension://akcbnhoidebjpiefdkmaaicfgdpbnoac/"]}$\r$\n'
 	FileClose $9 ;Closes the filled file
 
 

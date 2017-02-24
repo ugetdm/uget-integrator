@@ -1,6 +1,6 @@
 /*
 * uget-chrome-wrapper is an extension to integrate uGet Download manager
-* with Google Chrome, Chromium and Vivaldi in Linux and Windows.
+* with Google Chrome, Chromium, Vivaldi and Opera in Linux and Windows.
 *
 * Copyright (C) 2016  Gobinath
 *
@@ -20,7 +20,6 @@
 
 body {
     overflow-x: hidden;
-    background: #EFEFEF;
 }
 
 input#save {
@@ -55,11 +54,19 @@ hr {
     height: 1px;
     border: 0;
     border-top: 1px solid #ccc;
-    margin: 1em 0;
+    /*margin: 1em 0;*/
     padding: 0;
 }
 
-label {
+#info {
+    color: #808080;
+    display: table;
+    text-align: center;
+    margin: 0 auto;
+    line-height: 50%;
+}
+
+#label {
     font-weight: bold;
     color: #4A4A4A;
 }

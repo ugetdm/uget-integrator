@@ -1,6 +1,6 @@
 /*
 * uget-chrome-wrapper is an extension to integrate uGet Download manager
-* with Google Chrome, Chromium and Vivaldi in Linux and Windows.
+* with Google Chrome, Chromium, Vivaldi and Opera in Linux and Windows.
 *
 * Copyright (C) 2016  Gobinath
 *
@@ -18,7 +18,7 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-function addBookmark() {
+function saveChanges() {
     var keywords = document.getElementById("keywords").value;
     var interrupt = document.getElementById('chk-interrupt').checked;
 
@@ -32,12 +32,19 @@ function addBookmark() {
     window.close();
 }
 
+function updateInfo(info) {
+    document.getElementById('info').innerHTML = info;
+}
+
 // When the popup HTML has loaded
 window.addEventListener('load', function(evt) {
-	// alert(localStorage["uget-interrupt"]);
-	// alert(typeof localStorage["uget-interrupt"]);
+    chrome.runtime.getBackgroundPage(function(backgroundPage) {
+    	// alert('hi');
+        document.getElementById('info').innerHTML = backgroundPage.getInfo();
+    });
+
 	var interrupt = (localStorage["uget-interrupt"] == "true");
-    document.getElementById('save').addEventListener('click', addBookmark);
+    document.getElementById('save').addEventListener('click', saveChanges);
     document.getElementById('keywords').value = localStorage["uget-keywords"];
     document.getElementById('chk-interrupt').checked = interrupt;
 });

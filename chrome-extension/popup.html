@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- uget-chrome-wrapper is an extension to integrate uGet Download manager
-~ with Google Chrome, Chromium and Vivaldi in Linux and Windows.
+~ with Google Chrome, Chromium, Vivaldi and Opera in Linux and Windows.
 ~
 ~ Copyright (C) 2016  Gobinath
 ~
@@ -27,19 +27,21 @@
 <body>
     <div id="parent-container">
         <div id="title-container">
-            <img id="img-icon" src="icon_32.png" /> <span>uGet Chrome Integration</span>
+            <img id="img-icon" src="icon_32.png" /> <span>uGet Integration 2.0.0</span>
         </div>
         <hr>
+        <label id="info"></label>
+        <hr>
         <div id="controls-container" class="inline">
-            <label title="Ctrl + Shift + U" for="switch">Interrupt downloads:&nbsp;</label>
-            <label class="switch">
+            <label id="label" title="Ctrl + Shift + U" for="switch">Interrupt downloads:&nbsp;</label>
+            <label id="label" class="switch">
                 <input id="chk-interrupt" type="checkbox" checked="false">
                 <div class="slider round"></div>
             </label>
         </div>
         <br>
         <div id="controls-container">
-            <label for="keywords">Exclude URLs containing:</label>
+            <label id="label" for="keywords">Exclude URLs containing:</label>
             <input title="Separate values by comma (Eg: github.com, .jpg)" type="text" id="keywords" name="keywords" size="50" value="" />
         </div>
         <div id="button-container">
