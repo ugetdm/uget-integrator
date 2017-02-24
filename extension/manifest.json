@@ -1,0 +1,46 @@
+{
+    "background": {
+        "scripts": [
+            "background.js"
+        ]
+    },
+    "browser_action": {
+        "default_icon": "icon_32.png",
+	"default_popup": "popup.html"
+    },
+    "content_scripts": [
+        {
+            "all_frames": true,
+            "js": [
+                "content.js"
+            ],
+            "matches": [
+                "http://*/*",
+                "https://*/*"
+            ],
+            "run_at": "document_start"
+        }
+    ],
+    "description": "uGet Browser Integration extension replaces default download manager of Google Chrome by uGet Download Manager.",
+    "homepage_url": "https://slgobinath.github.io/uget-chrome-wrapper",
+    "icons": {
+        "32": "icon_32.png",
+        "48": "icon_48.png",
+        "128": "icon_128.png"
+    },
+    "manifest_version": 2,
+    "minimum_chrome_version": "19.0",
+    "name": "uGet Integration",
+    "short_name": "uGet",
+    "offline_enabled": true,
+    "permissions": [
+        "<all_urls>",
+        "webRequest",
+        "webRequestBlocking",
+        "nativeMessaging",
+        "contextMenus",
+        "downloads",
+	"storage"
+    ],
+    "version": "1.1.6"
+}

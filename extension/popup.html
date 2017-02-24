@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<!-- uget-chrome-wrapper is an extension to integrate uGet Download manager
+~ with Google Chrome, Chromium, Vivaldi and Opera in Linux and Windows.
+~
+~ Copyright (C) 2016  Gobinath
+~
+~ This program is free software: you can redistribute it and/or modify
+~ it under the terms of the GNU General Public License as published by
+~ the Free Software Foundation, either version 3 of the License, or
+~ (at your option) any later version.
+~
+~ This program is distributed in the hope that it will be useful,
+~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+~ GNU General Public License for more details.
+~
+~ You should have received a copy of the GNU General Public License
+~ along with this program.  If not, see <http://www.gnu.org/licenses/>. -->
+
+<html>
+
+<head>
+    <script src="popup.js"></script>
+    <link rel="stylesheet" type="text/css" href="popup.css">
+</head>
+
+<body>
+    <div id="parent-container">
+        <div id="title-container">
+            <img id="img-icon" src="icon_32.png" /> <span>uGet Integration 2.0.0</span>
+        </div>
+        <hr>
+        <label id="info"></label>
+        <hr>
+        <div id="controls-container" class="inline">
+            <label id="label" title="Ctrl + Shift + U" for="switch">Interrupt downloads:&nbsp;</label>
+            <label id="label" class="switch">
+                <input id="chk-interrupt" type="checkbox" checked="false">
+                <div class="slider round"></div>
+            </label>
+        </div>
+        <br>
+        <div id="controls-container">
+            <label id="label" for="keywords">Exclude URLs containing:</label>
+            <input title="Separate values by comma (Eg: github.com, .jpg)" type="text" id="keywords" name="keywords" size="50" value="" />
+        </div>
+        <div id="button-container">
+            <input type="button" value="Save" id="save" />
+        </div>
+    </div>
+</body>
+
+</html>
