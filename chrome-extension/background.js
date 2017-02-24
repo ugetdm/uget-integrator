@@ -61,7 +61,6 @@ if (!localStorage["uget-interrupt"]) {
     var interrupt = (localStorage["uget-interrupt"] == "true");
     setInterruptDownload(interrupt);
 }
-console.log(localStorage["uget-interrupt"]);
 // Message format to send the download information to the uget-chrome-wrapper
 var message = {
     url: '',

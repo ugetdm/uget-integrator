@@ -45,7 +45,8 @@ def extract_file_name(url):
 	fileName = ''
 	if 'googlevideo.com/' in url and '&title=' in url:
 		# Youtube video
-		url = urllib.unquote(url)
+		logger.debug('Found Youtube video')
+		url = urllib.parse.unquote(url)
 		url_components = url.split('&')
 		for smt in url_components:
 			if smt.startswith('title='):
@@ -57,6 +58,7 @@ def extract_file_name(url):
 			fileName = title
 			if mime:
 				fileName += guess_extension(mime)
+			logger.debug('Youtube filename: ' + fileName)
 	else:
 		fileName = basename(urlparse(url).path).replace('%20', ' ')
 
