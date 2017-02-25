@@ -1,28 +1,30 @@
 /*
-* uget-chrome-wrapper is an extension to integrate uGet Download manager
-* with Google Chrome, Chromium and Vivaldi in Linux and Windows.
-*
-* Copyright (C) 2016  Gobinath
-*
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * uget-chrome-wrapper is an extension to integrate uGet Download manager
+ * with Google Chrome, Chromium, Vivaldi and Opera in Linux and Windows.
+ *
+ * Copyright (C) 2016  Gobinath
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 var interruptDownloads = true;
 var ugetWrapperNotFound = true;
 var interruptDownload = false;
 var disposition = '';
 var hostName = 'com.javahelps.ugetchromewrapper';
+var ugetChromeWrapperVersion;
+var ugetVersion;
 var chromeVersion;
 var filter = [];
 var keywords = [];
@@ -46,12 +48,14 @@ try {
     chromeVersion = 33;
 }
 chromeVersion = parseInt(chromeVersion);
-sendMessageToHost({ version: "1.1.6" });
+sendMessageToHost({
+    version: "2.0.0"
+});
 
 if (localStorage["uget-keywords"]) {
     keywords = localStorage["uget-keywords"].split(/[\s,]+/);
 } else {
-	localStorage["uget-keywords"] = '';
+    localStorage["uget-keywords"] = '';
 }
 
 
@@ -61,7 +65,6 @@ if (!localStorage["uget-interrupt"]) {
     var interrupt = (localStorage["uget-interrupt"] == "true");
     setInterruptDownload(interrupt);
 }
-console.log(localStorage["uget-interrupt"]);
 // Message format to send the download information to the uget-chrome-wrapper
 var message = {
     url: '',
@@ -76,10 +79,10 @@ var message = {
 // Listen to the key press
 chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
     var msg = request.message;
-    if(msg === 'enable') {
+    if (msg === 'enable') {
         // Temporarily enable
         setInterruptDownload(true);
-    } else if(msg == 'disable') {
+    } else if (msg == 'disable') {
         // Temporarily disable
         setInterruptDownload(false);
     } else {
@@ -92,7 +95,21 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
 function sendMessageToHost(message) {
     chrome.runtime.sendNativeMessage(hostName, message, function(response) {
         ugetWrapperNotFound = (response == null);
+        if (!ugetWrapperNotFound && !ugetChromeWrapperVersion) {
+            ugetChromeWrapperVersion = response.version;
+            ugetVersion = response.uget;
+        }
     });
+}
+
+function getInfo() {
+    if (ugetWrapperNotFound || !ugetChromeWrapperVersion) {
+        return "<font color='red'>Error: Unable to connect to the uget-chrome-wrapper</font>";
+    } else if (!ugetChromeWrapperVersion.startsWith("2.")) {
+        return "<font color='orange'>Warning: Please update the uget-chrome-wrapper to the latest version</font>";
+    } else {
+        return "<font color='green'>Info: Found uGet: " + ugetVersion + " and uget-chrome-wrapper: " + ugetChromeWrapperVersion + "</font>";
+    }
 }
 
 function clearMessage() {
@@ -159,7 +176,9 @@ chrome.downloads.onCreated.addListener(function(downloadItem) {
     }
 
     chrome.downloads.cancel(downloadItem.id); // Cancel the download
-    chrome.downloads.erase({ id: downloadItem.id }); // Erase the download from list
+    chrome.downloads.erase({
+        id: downloadItem.id
+    }); // Erase the download from list
 
     clearMessage();
     message.url = url;
@@ -297,7 +316,9 @@ chrome.webRequest.onHeadersReceived.addListener(function(details) {
         message.postdata = '';
         var scheme = /^https/.test(details.url) ? 'https' : 'http';
         if (chromeVersion >= 35) {
-            return { redirectUrl: "javascript:" };
+            return {
+                redirectUrl: "javascript:"
+            };
         } else if (details.frameId === 0) {
             chrome.tabs.update(details.tabId, {
                 url: "javascript:"
@@ -360,11 +381,15 @@ function isBlackListed(url) {
 function setInterruptDownload(interrupt, writeToStorage) {
     interruptDownloads = interrupt;
     if (interrupt) {
-        chrome.browserAction.setIcon({ path: "./icon_32.png" });
+        chrome.browserAction.setIcon({
+            path: "./icon_32.png"
+        });
     } else {
-        chrome.browserAction.setIcon({ path: "./icon_disabled_32.png" });
+        chrome.browserAction.setIcon({
+            path: "./icon_disabled_32.png"
+        });
     }
-    if(writeToStorage) {
+    if (writeToStorage) {
         localStorage["uget-interrupt"] = interrupt.toString();
     }
 }

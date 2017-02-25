@@ -1,5 +1,5 @@
 // uget-chrome-wrapper is a tool to integrate uGet Download manager
-// with Google Chrome in Linux systems.
+// with Google Chrome, Chromium, Vivaldi and Opera in Linux and Windows.
 
 // Copyright (C) 2016  Gobinath
 
@@ -18,10 +18,11 @@
 
 {
     "name": "com.javahelps.ugetchromewrapper",
-    "description": "Integrate uGet with Google Chrome",
+    "description": "Integrate uGet with Google Chrome, Chromium, Vivaldi and Opera",
     "path": "/usr/bin/uget-chrome-wrapper",
     "type": "stdio",
     "allowed_origins": [
-        "chrome-extension://efjgjleilhflffpbnkaofpmdnajdpepi/"
+        "chrome-extension://efjgjleilhflffpbnkaofpmdnajdpepi/",
+        "chrome-extension://akcbnhoidebjpiefdkmaaicfgdpbnoac/"
     ]
 }
