@@ -31,7 +31,7 @@ Please test uget-chrome-wrapper on your system and report any issues [here](http
 Please test uget-chrome-wrapper and create installers for your operating system
 
 ## History
-Version 2.0.0 (Under developer testing):
+Version 2.0.0:
  * Migrate to Python 3
  * Show uget-chrome-wrapper status in the extension
  * Submitted native Opera addon
