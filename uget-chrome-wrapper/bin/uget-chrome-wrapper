@@ -25,7 +25,7 @@ from os.path import splitext, basename, join, expanduser
 from mimetypes import guess_extension
 
 UGET_COMMAND = "uget-gtk"
-VERSION = "2.0.0"
+VERSION = "2.0.1"
 
 logger = logging.getLogger()
 # log_file_path = join(expanduser('~'), 'uget-chrome-wrapper.log')

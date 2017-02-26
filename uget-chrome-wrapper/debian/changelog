@@ -1,4 +1,4 @@
-uget-chrome-wrapper (2.0.0-1) xenial; urgency=medium
+uget-chrome-wrapper (2.0.1-1) xenial; urgency=medium
 
   * Migrate to Python 3
   
