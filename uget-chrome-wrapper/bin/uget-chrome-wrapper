@@ -98,7 +98,7 @@ def read_message():
 
 		if text:
 			if not 'url' in text:
-				uget_version = subprocess.run(UGET_COMMAND + " --version", shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout;
+				uget_version = subprocess.Popen([UGET_COMMAND + " --version"], shell=True, stdout=subprocess.PIPE, universal_newlines=True).communicate()[0]
 				uget_version = uget_version.replace('uGet', '').replace('for GTK+', '').strip()
 				logger.debug('uGet version: ' + uget_version)
 				send_message('{"enable": true, "version": "' + VERSION + '", "uget": "' + uget_version + '"}')
