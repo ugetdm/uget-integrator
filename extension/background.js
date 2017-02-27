@@ -49,7 +49,7 @@ try {
 }
 chromeVersion = parseInt(chromeVersion);
 sendMessageToHost({
-    version: "2.0.0"
+    version: "2.0.3"
 });
 
 if (localStorage["uget-keywords"]) {
@@ -104,11 +104,11 @@ function sendMessageToHost(message) {
 
 function getInfo() {
     if (ugetWrapperNotFound || !ugetChromeWrapperVersion) {
-        return "<font color='red'>Error: Unable to connect to the uget-chrome-wrapper</font>";
+        return "Error: Unable to connect to the uget-chrome-wrapper";
     } else if (!ugetChromeWrapperVersion.startsWith("2.")) {
-        return "<font color='orange'>Warning: Please update the uget-chrome-wrapper to the latest version</font>";
+        return "Warning: Please update the uget-chrome-wrapper to the latest version";
     } else {
-        return "<font color='green'>Info: Found uGet: " + ugetVersion + " and uget-chrome-wrapper: " + ugetChromeWrapperVersion + "</font>";
+        return "Info: Found uGet: " + ugetVersion + " and uget-chrome-wrapper: " + ugetChromeWrapperVersion;
     }
 }
 

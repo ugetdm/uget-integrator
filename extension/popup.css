@@ -59,11 +59,27 @@ hr {
 }
 
 #info {
-    color: #808080;
     display: table;
     text-align: center;
     margin: 0 auto;
     line-height: 50%;
+    color: green;
+}
+
+#warn {
+    display: table;
+    text-align: center;
+    margin: 0 auto;
+    line-height: 50%;
+    color: orange;
+}
+
+#error {
+    display: table;
+    text-align: center;
+    margin: 0 auto;
+    line-height: 50%;
+    color: red;
 }
 
 #label {
