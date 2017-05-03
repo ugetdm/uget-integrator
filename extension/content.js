@@ -20,14 +20,14 @@
 
 window.onkeydown = function(event) {
     if (event.keyCode == 45) { // Insert
-        chrome.extension.sendRequest({ message: 'disable' });
+        browser.runtime.sendMessage({ message: 'disable' });
     }
 };
 
 window.onkeyup = function(event) {
     if (event.keyCode == 45) { // Insert
-       chrome.extension.sendRequest({ message: 'enable' });
+        browser.runtime.sendMessage({ message: 'enable' });
     } else if (event.keyCode == 85 && event.ctrlKey && event.shiftKey) { // Ctrl + Shift + U
-        chrome.extension.sendRequest({ message: 'toggle' });
+        browser.runtime.sendMessage({ message: 'toggle' });
     }
 };

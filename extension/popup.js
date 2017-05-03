@@ -20,11 +20,11 @@
 
 function saveChanges() {
 	var keywords = document.getElementById("keywords").value;
-	var interrupt = document.getElementById('chk-interrupt').checked;
+    var interrupt = document.getElementById('chk-interrupt').checked;
 
 	localStorage["uget-keywords"] = keywords;
 
-	chrome.runtime.getBackgroundPage(function(backgroundPage) {
+	browser.runtime.getBackgroundPage(function(backgroundPage) {
 		backgroundPage.updateKeywords(keywords);
 		backgroundPage.setInterruptDownload(interrupt, true);
 	});
@@ -35,9 +35,9 @@ function saveChanges() {
 // When the popup HTML has loaded
 window.addEventListener('load', function(evt) {
 	// Show the system status
-	chrome.runtime.getBackgroundPage(function(backgroundPage) {
-		var message = backgroundPage.getInfo().replace(/<[^>]*>?/g, '');
-		var label = 'error';
+	browser.runtime.getBackgroundPage(function(backgroundPage) {
+        var message = backgroundPage.getInfo().replace(/<[^>]*>?/g, '');
+        var label = 'error';
 		if(message.toLowerCase().startsWith("info")) {
 			label = 'info';
 		} else if(message.toLowerCase().startsWith("warn")) {
@@ -46,7 +46,7 @@ window.addEventListener('load', function(evt) {
 		document.getElementById(label).innerHTML = message;
 	});
 
-	var interrupt = (localStorage["uget-interrupt"] == "true");
+    let interrupt = (localStorage["uget-interrupt"] == "true");
 	document.getElementById('save').addEventListener('click', saveChanges);
 	document.getElementById('keywords').value = localStorage["uget-keywords"];
 	document.getElementById('chk-interrupt').checked = interrupt;
