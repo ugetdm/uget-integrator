@@ -31,7 +31,7 @@
     !endif
     Pop ${output}
 !macroend
- 
+
 !macro Func_StrRep un
     Function ${un}StrRep
         Exch $R2 ;new
@@ -46,7 +46,7 @@
         Push $R7
         Push $R8
         Push $R9
- 
+
         StrCpy $R3 0
         StrLen $R4 $R1
         StrLen $R6 $R0
@@ -66,7 +66,7 @@
             IntOp $R3 $R3 + $R9 ;move offset by length of the replacement string
             Goto loop
         done:
- 
+
         Pop $R9
         Pop $R8
         Pop $R7
@@ -101,7 +101,7 @@
 
   ;Default installation folder
   InstallDir $PROGRAMFILES\uget-chrome-wrapper
-  
+
   ;Get installation folder from registry if available
   InstallDirRegKey HKLM "Software\uget-chrome-wrapper" "Install_Dir"
 
@@ -119,13 +119,13 @@
   !insertmacro MUI_PAGE_LICENSE "../../LICENSE"
   !insertmacro MUI_PAGE_DIRECTORY
   !insertmacro MUI_PAGE_INSTFILES
-  
+
   !insertmacro MUI_UNPAGE_CONFIRM
   !insertmacro MUI_UNPAGE_INSTFILES
-  
+
 ;--------------------------------
 ;Languages
- 
+
   !insertmacro MUI_LANGUAGE "English"
 
 
@@ -146,16 +146,23 @@ Section "uget-chrome-wrapper (required)"
 	; Replace \ by \\ in the installation path
 	${StrRep} $0 "$INSTDIR" "\" "\\"
 
-	; Update the json file
+	; Update the com.javahelps.ugetchromewrapper.json file
 	FileOpen $9 $INSTDIR\com.javahelps.ugetchromewrapper.json w ;Opens a Empty File an fills it
 	FileWrite $9 '{"name":"com.javahelps.ugetchromewrapper","description":"Integrate uGet with Google Chrome","path":"$0\\uget-chrome-wrapper.py","type":"stdio","allowed_origins":["chrome-extension://efjgjleilhflffpbnkaofpmdnajdpepi/","chrome-extension://akcbnhoidebjpiefdkmaaicfgdpbnoac/"]}$\r$\n'
 	FileClose $9 ;Closes the filled file
 
+  ; Update the com.javahelps.ugetfirefoxwrapper.json file
+	FileOpen $9 $INSTDIR\com.javahelps.ugetfirefoxwrapper.json w ;Opens a Empty File an fills it
+	FileWrite $9 '{"name":"com.javahelps.ugetfirefoxwrapper","description":"Integrate uGet with Mozilla Firefox","path":"$0\\uget-chrome-wrapper.py","type":"stdio","allowed_extensions":["uget-integration@slgobinath"]}$\r$\n'
+	FileClose $9 ;Closes the filled file
 
 	; Write the installation path into the registry
 	WriteRegStr HKLM SOFTWARE\uget-chrome-wrapper "Install_Dir" "$INSTDIR"
 	WriteRegStr HKCU "SOFTWARE\Google\Chrome\NativeMessagingHosts\com.javahelps.ugetchromewrapper" "" "$INSTDIR\com.javahelps.ugetchromewrapper.json"
 	WriteRegStr HKLM "SOFTWARE\Google\Chrome\NativeMessagingHosts\com.javahelps.ugetchromewrapper" "" "$INSTDIR\com.javahelps.ugetchromewrapper.json"
+  WriteRegStr HKCU "SOFTWARE\Mozilla\NativeMessagingHosts\com.javahelps.ugetfirefoxwrapper" "" "$INSTDIR\com.javahelps.ugetfirefoxwrapper.json"
+	WriteRegStr HKLM "SOFTWARE\Mozilla\NativeMessagingHosts\com.javahelps.ugetfirefoxwrapper" "" "$INSTDIR\com.javahelps.ugetfirefoxwrapper.json"
+
 
 	; Write the uninstall keys for Windows
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\uget-chrome-wrapper" "DisplayName" "uGet Chrome Wrapper"
@@ -171,10 +178,12 @@ SectionEnd
 ; Uninstaller
 
 Section "Uninstall"
-  
+
 	; Remove registry keys
 	DeleteRegKey HKCU "SOFTWARE\Google\Chrome\NativeMessagingHosts\com.javahelps.ugetchromewrapper"
 	DeleteRegKey HKLM "SOFTWARE\Google\Chrome\NativeMessagingHosts\com.javahelps.ugetchromewrapper"
+  DeleteRegKey HKCU "SOFTWARE\Mozilla\NativeMessagingHosts\com.javahelps.ugetfirefoxwrapper"
+	DeleteRegKey HKLM "SOFTWARE\Mozilla\NativeMessagingHosts\com.javahelps.ugetfirefoxwrapper"
 	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\uget-chrome-wrapper"
 	DeleteRegKey HKLM SOFTWARE\uget-chrome-wrapper
 
