@@ -87,7 +87,7 @@ hr {
     color: #4A4A4A;
 }
 
-#keywords {
+#keywordsToInclude, #keywordsToExclude, #fileSize {
     border: 1px solid #c4c4c4;
     font-size: 13px;
     padding: 4px 4px 4px 4px;
@@ -101,7 +101,7 @@ hr {
     margin-bottom: 5px;
 }
 
-#keywords:focus {
+#keywordsToInclude:focus, #keywordsToExclude:focus, #fileSize:focus {
     outline: none;
     border: 1px solid #7bc1f7;
     box-shadow: 0px 0px 5px #7bc1f7;

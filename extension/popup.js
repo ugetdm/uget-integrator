@@ -35,14 +35,24 @@ try {
 }
 
 function saveChanges() {
-	var keywords = document.getElementById("keywords").value;
+	var keywordsToExclude = document.getElementById("keywordsToExclude").value;
+	var keywordsToInclude = document.getElementById("keywordsToInclude").value;
 	var interrupt = document.getElementById('chk-interrupt').checked;
+	var minFileSize = parseInt(document.getElementById("fileSize").value) * 1024;
+	if (isNaN(minFileSize)) {
+		minFileSize = 300 * 1024;
+	} else if(minFileSize < 0) {
+		minFileSize = 0;
+	}
 
-	localStorage["uget-keywords"] = keywords;
+	localStorage["uget-keywords-exclude"] = keywordsToExclude;
+	localStorage["uget-keywords-include"] = keywordsToInclude;
+	localStorage["uget-min-file-size"] = minFileSize;
 
 	current_browser.runtime.getBackgroundPage(function(backgroundPage) {
-		backgroundPage.updateKeywords(keywords);
+		backgroundPage.updateKeywords(keywordsToInclude, keywordsToExclude);
 		backgroundPage.setInterruptDownload(interrupt, true);
+		backgroundPage.updateMinFileSize(minFileSize);
 	});
 
 	window.close();
@@ -64,6 +74,8 @@ window.addEventListener('load', function(evt) {
 
 	let interrupt = (localStorage["uget-interrupt"] == "true");
 	document.getElementById('save').addEventListener('click', saveChanges);
-	document.getElementById('keywords').value = localStorage["uget-keywords"];
+	document.getElementById('keywordsToExclude').value = localStorage["uget-keywords-exclude"];
+	document.getElementById('keywordsToInclude').value = localStorage["uget-keywords-include"];
+	document.getElementById('fileSize').value = localStorage["uget-min-file-size"] / 1024;
 	document.getElementById('chk-interrupt').checked = interrupt;
 });

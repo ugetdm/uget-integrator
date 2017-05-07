@@ -25,7 +25,7 @@ from os.path import splitext, basename, join, expanduser
 from mimetypes import guess_extension
 
 UGET_COMMAND = "uget-gtk"
-VERSION = "2.0.2"
+VERSION = "2.0.3"
 
 logger = logging.getLogger()
 # log_file_path = join(expanduser('~'), 'uget-chrome-wrapper.log')
@@ -52,7 +52,7 @@ def extract_file_name(url):
 				title = smt.replace('title=', '').replace('+', ' ')
 			elif smt.startswith('mime='):
 				mime = smt.replace('mime=', '')
-		
+
 		if title:
 			fileName = title
 			if mime:
@@ -79,7 +79,7 @@ def send_message(message):
 
 # Read messages from the webapp.
 def read_message():
-	
+
 	logger.info('uget-chrome-wrapper is reading the message')
 
 	while 1:
@@ -103,22 +103,44 @@ def read_message():
 				logger.debug('uGet version: ' + uget_version)
 				send_message('{"enable": true, "version": "' + VERSION + '", "uget": "' + uget_version + '"}')
 				return
-			
+
 			send_message('{"state": "accepted"}')
 			data = json.loads(text)
 			url = data['url']
-			
-			if url: 
+
+			if url:
+				cookie_filepath = '/tmp/uget_cookie'
+				use_cookie_file = False
 				filename = data['filename']
 				cookie = data['cookies']
 				referer = data['referrer']
+				command = [UGET_COMMAND, "--filename=" + filename]
+				if cookie:
+					try:
+						with open(cookie_filepath, 'w') as cookie_file:
+							cookie_file.write(cookie)
+						use_cookie_file = True
+					except Exception as e:
+						pass
 				if not filename:
 					filename = extract_file_name(url)
 				if referer:
-					subprocess.call([UGET_COMMAND, "--http-referer=" + referer, "--filename=" + filename, url])
-				else:
-					subprocess.call([UGET_COMMAND, "--filename=" + filename, url])
-			
+					command.append("--http-referer=" + referer)
+					# subprocess.call([UGET_COMMAND, "--http-referer=" + referer, "--filename=" + filename, url])
+				# else:
+				# 	subprocess.call([UGET_COMMAND, "--filename=" + filename, url])
+				if use_cookie_file:
+					command.append("--http-cookie-file=" + cookie_filepath)
+				command.append(url)
+
+				subprocess.call(command)
+
+				if use_cookie_file:
+					try:
+						os.remove(cookie_filepath)
+					except Exception as e:
+						pass
+
 			sys.exit(0)
 
 
