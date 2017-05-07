@@ -18,14 +18,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// TODO: Firefox on Windows needs the native messaging app manifest path to be in the registry:
+//          https://developer.mozilla.org/en-US/Add-ons/WebExtensions/Native_messaging
+// TODO: LocalStorage support for Firefox (how does this work here?)
+
 var interruptDownloads = true;
 var ugetWrapperNotFound = true;
-var interruptDownload = false;
 var disposition = '';
 var hostName = 'com.javahelps.ugetchromewrapper';
 var ugetChromeWrapperVersion;
 var ugetVersion;
 var chromeVersion;
+var firefoxVersion;
 var filter = [];
 var keywords = [];
 var requestList = [{
@@ -47,6 +51,18 @@ try {
 } catch (ex) {
     chromeVersion = 33;
 }
+try {
+    browser.runtime.getBrowserInfo().then(
+        function(info) {
+            if (info.name === 'Firefox') {
+                firefoxVersion = info.version.replace(/[ab]\d+/, '');
+            }
+        }
+    );
+} catch (ex) {
+    firefoxVersion = 0;
+}
+
 chromeVersion = parseInt(chromeVersion);
 sendMessageToHost({
     version: "2.0.3"
@@ -77,7 +93,7 @@ var message = {
 };
 
 // Listen to the key press
-chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
+browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     var msg = request.message;
     if (msg === 'enable') {
         // Temporarily enable
@@ -93,7 +109,7 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
 
 // Send message to the uget-chrome-wrapper
 function sendMessageToHost(message) {
-    chrome.runtime.sendNativeMessage(hostName, message, function(response) {
+    browser.runtime.sendNativeMessage(hostName, message, function(response) {
         ugetWrapperNotFound = (response == null);
         if (!ugetWrapperNotFound && !ugetChromeWrapperVersion) {
             ugetChromeWrapperVersion = response.version;
@@ -130,13 +146,13 @@ function postParams(source) {
 }
 
 // Add to Chrome context menu
-chrome.contextMenus.create({
+browser.contextMenus.create({
     title: 'Download with uGet',
     id: "download_with_uget",
     contexts: ['link']
 });
 
-chrome.contextMenus.onClicked.addListener(function(info, tab) {
+browser.contextMenus.onClicked.addListener(function(info, tab) {
     "use strict";
     if (info.menuItemId === "download_with_uget") {
         clearMessage();
@@ -147,8 +163,8 @@ chrome.contextMenus.onClicked.addListener(function(info, tab) {
     }
 });
 
-// Interrupt Google Chrome download
-chrome.downloads.onCreated.addListener(function(downloadItem) {
+// Interrupt downloads on creation
+browser.downloads.onCreated.addListener(function(downloadItem) {
 
     if (ugetWrapperNotFound || !interruptDownloads) { // uget-chrome-wrapper not installed
         return;
@@ -175,10 +191,13 @@ chrome.downloads.onCreated.addListener(function(downloadItem) {
         return;
     }
 
-    chrome.downloads.cancel(downloadItem.id); // Cancel the download
-    chrome.downloads.erase({
-        id: downloadItem.id
-    }); // Erase the download from list
+    // Cancel the download
+    browser.downloads.cancel(downloadItem.id).then(
+        function() {
+            // Erase the download from list
+            browser.downloads.erase({ id: downloadItem.id }); // ignore callbacks
+        }
+    );
 
     clearMessage();
     message.url = url;
@@ -188,8 +207,8 @@ chrome.downloads.onCreated.addListener(function(downloadItem) {
     sendMessageToHost(message);
 });
 
-chrome.webRequest.onBeforeRequest.addListener(function(details) {
-    if (details.method == 'POST') {
+browser.webRequest.onBeforeRequest.addListener(function(details) {
+    if (details.method === 'POST') {
         message.postdata = postParams(details.requestBody.formData);
     }
     return {
@@ -207,7 +226,7 @@ chrome.webRequest.onBeforeRequest.addListener(function(details) {
     'blocking',
     'requestBody'
 ]);
-chrome.webRequest.onBeforeSendHeaders.addListener(function(details) {
+browser.webRequest.onBeforeSendHeaders.addListener(function(details) {
     clearMessage();
     currRequest++;
     if (currRequest > 2)
@@ -238,7 +257,7 @@ chrome.webRequest.onBeforeSendHeaders.addListener(function(details) {
     'blocking',
     'requestHeaders'
 ]);
-chrome.webRequest.onHeadersReceived.addListener(function(details) {
+browser.webRequest.onHeadersReceived.addListener(function(details) {
 
     if (ugetWrapperNotFound) { // uget-chrome-wrapper not installed
         return {
@@ -258,7 +277,7 @@ chrome.webRequest.onHeadersReceived.addListener(function(details) {
         };
     }
 
-    interruptDownload = false;
+    var interruptDownload = false;
     message.url = details.url;
     var contentType = "";
 
@@ -294,7 +313,7 @@ chrome.webRequest.onHeadersReceived.addListener(function(details) {
             }
         }
     }
-    if (interruptDownload == true && interruptDownloads == true) {
+    if (interruptDownload && interruptDownloads) {
         for (var i = 0; i < filter.length; i++) {
             if (filter[i] != "" && contentType.lastIndexOf(filter[i]) != -1) {
                 return {
@@ -315,12 +334,12 @@ chrome.webRequest.onHeadersReceived.addListener(function(details) {
         sendMessageToHost(message);
         message.postdata = '';
         var scheme = /^https/.test(details.url) ? 'https' : 'http';
-        if (chromeVersion >= 35) {
+        if (chromeVersion >= 35 || firefoxVersion >= 51) {
             return {
                 redirectUrl: "javascript:"
             };
         } else if (details.frameId === 0) {
-            chrome.tabs.update(details.tabId, {
+            browser.tabs.update(details.tabId, {
                 url: "javascript:"
             });
             var responseHeaders = details.responseHeaders.filter(function(header) {
@@ -343,7 +362,6 @@ chrome.webRequest.onHeadersReceived.addListener(function(details) {
             cancel: true
         };
     }
-    interruptDownloads == true;
     clearMessage();
     return {
         responseHeaders: details.responseHeaders
@@ -363,13 +381,13 @@ chrome.webRequest.onHeadersReceived.addListener(function(details) {
 
 function updateKeywords(data) {
     keywords = data.split(/[\s,]+/);
-};
+}
 
 function isBlackListed(url) {
     if (url.includes("//docs.google.com/") || url.includes("googleusercontent.com/docs")) { // Cannot download from Google Docs
         return true;
     }
-    for (keyword of keywords) {
+    for (var keyword of keywords) {
         if (url.includes(keyword)) {
             return true;
         }
@@ -381,11 +399,11 @@ function isBlackListed(url) {
 function setInterruptDownload(interrupt, writeToStorage) {
     interruptDownloads = interrupt;
     if (interrupt) {
-        chrome.browserAction.setIcon({
+        browser.browserAction.setIcon({
             path: "./icon_32.png"
         });
     } else {
-        chrome.browserAction.setIcon({
+        browser.browserAction.setIcon({
             path: "./icon_disabled_32.png"
         });
     }
