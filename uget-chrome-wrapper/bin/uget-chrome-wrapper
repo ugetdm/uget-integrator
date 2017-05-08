@@ -124,15 +124,23 @@ def read_message():
 						pass
 				if not filename:
 					filename = extract_file_name(url)
+				
+				# Add the referer url
 				if referer:
 					command.append("--http-referer=" + referer)
-					# subprocess.call([UGET_COMMAND, "--http-referer=" + referer, "--filename=" + filename, url])
-				# else:
-				# 	subprocess.call([UGET_COMMAND, "--filename=" + filename, url])
+
+				# Add the file name
+				if filename:
+					command.append("--filename=" + filename)
+
+				# Add the cookie file
 				if use_cookie_file:
 					command.append("--http-cookie-file=" + cookie_filepath)
+
+				# Add the url
 				command.append(url)
 
+				# Pass the parameters to uGet
 				subprocess.call(command)
 
 				if use_cookie_file:

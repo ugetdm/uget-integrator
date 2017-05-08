@@ -18,8 +18,10 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+
 body {
     overflow-x: hidden;
+    padding: 10px;
 }
 
 input#save {

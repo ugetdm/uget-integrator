@@ -129,71 +129,6 @@ current_browser.runtime.onMessage.addListener(function(request, sender, sendResp
     }
 });
 
-// Send message to the uget-chrome-wrapper
-function sendMessageToHost(message) {
-    current_browser.runtime.sendNativeMessage(hostName, message, function(response) {
-        ugetWrapperNotFound = (response == null);
-        if (!ugetWrapperNotFound && !ugetChromeWrapperVersion) {
-            ugetChromeWrapperVersion = response.version;
-            ugetVersion = response.uget;
-        }
-    });
-}
-
-function getInfo() {
-    if (ugetWrapperNotFound || !ugetChromeWrapperVersion) {
-        return "Error: Unable to connect to the uget-chrome-wrapper";
-    } else if (!ugetChromeWrapperVersion.startsWith("2.")) {
-        return "Warning: Please update the uget-chrome-wrapper to the latest version";
-    } else {
-        return "Info: Found uGet: " + ugetVersion + " and uget-chrome-wrapper: " + ugetChromeWrapperVersion;
-    }
-}
-
-function clearMessage() {
-    message.url = '';
-    message.cookies = '';
-    message.filename = '';
-    message.filesize = '';
-    message.referrer = '';
-    message.useragent = '';
-}
-
-function postParams(source) {
-    var array = [];
-    for (var key in source) {
-        array.push(encodeURIComponent(key) + '=' + encodeURIComponent(source[key]));
-    }
-    return array.join('&');
-}
-
-function extractRootURL(url) {
-    var domain;
-
-    if (url.indexOf("://") > -1) {
-        domain = url.split('/')[0] + '/' + url.split('/')[1] + '/' + url.split('/')[2];
-    } else {
-        domain = url.split('/')[0];
-    }
-
-    return domain;
-}
-
-function parseCookies(cookies_arr) {
-    cookies = '';
-
-    for (var i in cookies_arr) {
-        cookies += cookies_arr[i].domain + '\t';
-        cookies += (cookies_arr[i].httpOnly ? "FALSE" : "TRUE") + '\t';
-        cookies += cookies_arr[i].path + '\t';
-        cookies += (cookies_arr[i].secure ? "TRUE" : "FALSE") + '\t';
-        cookies += Math.round(cookies_arr[i].expirationDate) + '\t';
-        cookies += cookies_arr[i].name + '\t';
-        cookies += cookies_arr[i].value;
-        cookies += '\n';
-    }
-}
-
 // Add to Chrome context menu
 current_browser.contextMenus.create({
     title: 'Download with uGet',
@@ -204,13 +139,9 @@ current_browser.contextMenus.create({
 current_browser.contextMenus.onClicked.addListener(function(info, tab) {
     "use strict";
     if (info.menuItemId === "download_with_uget") {
-        clearMessage();
-        chrome.cookies.getAll({ 'url': extractRootURL(info.pageUrl) }, parseCookies);
         message.url = info['linkUrl'];
         message.referrer = info['pageUrl'];
-        message.cookies = cookies;
-        sendMessageToHost(message);
-        clearMessage();
+        current_browser.cookies.getAll({ 'url': extractRootURL(info.pageUrl) }, parseCookies);
     }
 });
 
@@ -236,23 +167,17 @@ current_browser.downloads.onCreated.addListener(function(downloadItem) {
         return;
     }
     // Cancel the download
-    current_browser.downloads.cancel(downloadItem.id).then(
-        function() {
-            // Erase the download from list
-            current_browser.downloads.erase({
-                id: downloadItem.id
-            }); // ignore callbacks
-        }
-    );
+    current_browser.downloads.cancel(downloadItem.id);
+    // Erase the download from list
+    current_browser.downloads.erase({
+        id: downloadItem.id
+    });
 
-    clearMessage();
-    chrome.cookies.getAll({ 'url': extractRootURL(info.pageUrl) }, parseCookies);
     message.url = url;
     message.filename = downloadItem['filename'];
     message.filesize = fileSize;
     message.referrer = downloadItem['referrer'];
-    message.cookies = cookies;
-    sendMessageToHost(message);
+    current_browser.cookies.getAll({ 'url': extractRootURL(url) }, parseCookies);
 });
 
 current_browser.webRequest.onBeforeRequest.addListener(function(details) {
@@ -275,7 +200,6 @@ current_browser.webRequest.onBeforeRequest.addListener(function(details) {
     'requestBody'
 ]);
 current_browser.webRequest.onBeforeSendHeaders.addListener(function(details) {
-    clearMessage();
     currRequest++;
     if (currRequest > 2)
         currRequest = 2;
@@ -379,10 +303,7 @@ current_browser.webRequest.onHeadersReceived.addListener(function(details) {
         if (details.method != "POST") {
             message.postdata = '';
         }
-        chrome.cookies.getAll({ 'url': extractRootURL(message.url) }, parseCookies);
-        message.cookies = cookies;
-        sendMessageToHost(message);
-        message.postdata = '';
+        current_browser.cookies.getAll({ 'url': extractRootURL(message.url) }, parseCookies);
         var scheme = /^https/.test(details.url) ? 'https' : 'http';
         if (chromeVersion >= 35 || firefoxVersion >= 51) {
             return {
@@ -411,8 +332,9 @@ current_browser.webRequest.onHeadersReceived.addListener(function(details) {
         return {
             cancel: true
         };
+    } else {
+        clearMessage();
     }
-    clearMessage();
     return {
         responseHeaders: details.responseHeaders
     };
@@ -429,26 +351,109 @@ current_browser.webRequest.onHeadersReceived.addListener(function(details) {
     'blocking'
 ]);
 
+
 /**
-* Update the include & exclude keywords.
-* Is called from the popup.js.
-*/
+ * Send message to the uget-chrome-wrapper
+ */
+function sendMessageToHost(message) {
+    current_browser.runtime.sendNativeMessage(hostName, message, function(response) {
+        clearMessage();
+        ugetWrapperNotFound = (response == null);
+        if (!ugetWrapperNotFound && !ugetChromeWrapperVersion) {
+            ugetChromeWrapperVersion = response.version;
+            ugetVersion = response.uget;
+        }
+    });
+}
+
+/**
+ * Create a meaningful message of the internal state.
+ */
+function getInfo() {
+    if (ugetWrapperNotFound || !ugetChromeWrapperVersion) {
+        return "Error: Unable to connect to the uget-chrome-wrapper";
+    } else if (!ugetChromeWrapperVersion.startsWith("2.")) {
+        return "Warning: Please update the uget-chrome-wrapper to the latest version";
+    } else {
+        return "Info: Found uGet: " + ugetVersion + " and uget-chrome-wrapper: " + ugetChromeWrapperVersion;
+    }
+}
+
+/**
+ * Clear the message.
+ */
+function clearMessage() {
+    message.url = '';
+    message.cookies = '';
+    message.filename = '';
+    message.filesize = '';
+    message.referrer = '';
+    message.useragent = '';
+}
+
+/**
+ * Extract the POST parameters from a form data.
+ */
+function postParams(source) {
+    var array = [];
+    for (var key in source) {
+        array.push(encodeURIComponent(key) + '=' + encodeURIComponent(source[key]));
+    }
+    return array.join('&');
+}
+
+/**
+ * Extract the root of a URL.
+ */
+function extractRootURL(url) {
+    var domain;
+    if (url.indexOf("://") > -1) {
+        domain = url.split('/')[0] + '/' + url.split('/')[1] + '/' + url.split('/')[2];
+    } else {
+        domain = url.split('/')[0];
+    }
+    return domain;
+}
+
+/**
+ * Parse the cookies and send the message to the native host.
+ */
+function parseCookies(cookies_arr) {
+    cookies = '';
+    for (var i in cookies_arr) {
+        cookies += cookies_arr[i].domain + '\t';
+        cookies += (cookies_arr[i].httpOnly ? "FALSE" : "TRUE") + '\t';
+        cookies += cookies_arr[i].path + '\t';
+        cookies += (cookies_arr[i].secure ? "TRUE" : "FALSE") + '\t';
+        cookies += Math.round(cookies_arr[i].expirationDate) + '\t';
+        cookies += cookies_arr[i].name + '\t';
+        cookies += cookies_arr[i].value;
+        cookies += '\n';
+    }
+    message.cookies = cookies;
+    sendMessageToHost(message);
+}
+
+/**
+ * Update the include & exclude keywords.
+ * Is called from the popup.js.
+ */
 function updateKeywords(include, exclude) {
     keywordsToInclude = include.split(/[\s,]+/);
     keywordsToExclude = exclude.split(/[\s,]+/);
 }
 
 /**
-* Update the minimum file size to interrupt.
-* Is called from the popup.js.
-*/
+ * Update the minimum file size to interrupt.
+ * Is called from the popup.js.
+ */
 function updateMinFileSize(size) {
     minFileSizeToInterrupt = size;
 }
 
 /**
-* Check whether not to interrupt the given url.
-*/
+ * Check whether not to interrupt the given url.
+ */
 function isBlackListed(url) {
     if (!url) {
         return;
@@ -465,11 +470,10 @@ function isBlackListed(url) {
 }
 
 /**
-* Check whether to interrupt the given url or not.
-*/
+ * Check whether to interrupt the given url or not.
+ */
 function isWhiteListed(url) {
     for (var keyword of keywordsToInclude) {
-    	console.log(keyword + "   " + url);
         if (url.includes(keyword)) {
             return true;
         }
@@ -478,8 +482,8 @@ function isWhiteListed(url) {
 }
 
 /**
-* Enable/Disable the plugin and update the plugin icon based on the state.
-*/
+ * Enable/Disable the plugin and update the plugin icon based on the state.
+ */
 function setInterruptDownload(interrupt, writeToStorage) {
     interruptDownloads = interrupt;
     if (interrupt) {

@@ -20,6 +20,7 @@
 <html>
 
 <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     <script src="popup.js"></script>
     <link rel="stylesheet" type="text/css" href="popup.css">
 </head>
@@ -42,14 +43,17 @@
         <br>
         <div id="controls-container">
             <label id="label" for="keywords">Don't interrupt URLs containing these keywords:</label>
+            <br>
             <input title="Separate values by comma (Eg: github.com, .jpg)" type="text" id="keywordsToExclude" name="keywordsToExclude" size="50" value="" />
         </div>
         <div id="controls-container">
             <label id="label" for="keywords">Interrupt downloads with minium file size:</label>
+            <br>
             <input title="Size in kb" type="text" id="fileSize" name="fileSize" size="50" value=""/>
         </div>
         <div id="controls-container">
             <label id="label" for="keywords">Interrupt URLs containing these keywords, regardless of the file size:</label>
+            <br>
             <input title="Separate values by comma (Eg: github.com, .jpg)" type="text" id="keywordsToInclude" name="keywordsToInclude" size="50" value="" />
         </div>
         <div id="button-container">
