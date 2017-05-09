@@ -19,13 +19,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # sudo apt install python3-urllib3
-import struct, sys, threading, logging, json, urllib, subprocess
+import struct, sys, threading, logging, json, urllib, subprocess, tempfile
 from urllib.parse import urlparse
 from os.path import splitext, basename, join, expanduser
 from mimetypes import guess_extension
 
+cookie_filepath = join(tempfile.gettempdir(), 'uget_cookie')
 UGET_COMMAND = "uget-gtk"
-VERSION = "2.0.3"
+VERSION = "2.0.4"
 
 logger = logging.getLogger()
 # log_file_path = join(expanduser('~'), 'uget-chrome-wrapper.log')
@@ -109,7 +110,6 @@ def read_message():
 			url = data['url']
 
 			if url:
-				cookie_filepath = '/tmp/uget_cookie'
 				use_cookie_file = False
 				filename = data['filename']
 				cookie = data['cookies']
