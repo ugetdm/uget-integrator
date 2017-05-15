@@ -19,13 +19,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # sudo apt install python3-urllib3
-import struct, sys, threading, logging, json, urllib, subprocess, tempfile
+import argparse, struct, sys, threading, logging, json, urllib, subprocess, tempfile
 from urllib.parse import urlparse
+from urllib.request import urlopen
 from os.path import splitext, basename, join, expanduser
 from mimetypes import guess_extension
 
 cookie_filepath = join(tempfile.gettempdir(), 'uget_cookie')
 UGET_COMMAND = "uget-gtk"
+UGET_CATEGORY_DIR = join(expanduser('~'), '.config/uGet/category')
 VERSION = "2.0.4"
 
 logger = logging.getLogger()
@@ -40,6 +42,7 @@ if sys.platform == 'win32':
 	msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
 	msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
 	UGET_COMMAND = 'uget'
+	UGET_CATEGORY_DIR = join(expanduser('~'), 'AppData\\Local\\uGet\\category')
 
 def extract_file_name(url):
 	fileName = ''
@@ -152,9 +155,42 @@ def read_message():
 			sys.exit(0)
 
 
+def download_category(fileName):
+	"""
+	Download the category from the repository and store in the config folder.
+	"""
+	downloads_directory = join(expanduser('~'), 'Downloads')
+	url = 'https://raw.githubusercontent.com/slgobinath/uget-chrome-wrapper/master/config/category/' + fileName
+	with urlopen(url) as response:
+		data = json.loads(response.read().decode('utf-8'))
+	data['info']['common']['folder'] =  join(downloads_directory, data['info']['common']['folder'])
+
+	category_file = join(UGET_CATEGORY_DIR, fileName)
+	logger.debug('Writing to ' + str(category_file))
+	with open(category_file, 'w') as outfile:
+		json.dump(data, outfile, indent=4)
+
+def add_categories():
+	"""
+	Download and add the categories to the uGet config directory.
+	"""
+	for index in range(1, 7):
+		print('000{}.json'.format(index))
+		download_category('000{}.json'.format(index))
+
 def Main():
 	read_message()
 
 
 if __name__ == '__main__':
-	Main()
+	parser = argparse.ArgumentParser()
+	parser.add_argument("-c", "--categorize", help="create new categories based on the file types", action="store_true")
+	parser.add_argument("-v", "--version", help="display the version of uget-chrome-wrapper and exit", action="store_true")
+	args = parser.parse_args()
+	
+	if args.version:
+		print('uget-chrome-wrapper {}'.format(VERSION))
+	elif args.categorize:
+		add_categories()
+	else:
+		Main()
