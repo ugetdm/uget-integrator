@@ -94,10 +94,11 @@
 
 ;--------------------------------
 ;General
+  !define _VERSION "2.0.4.0"
 
   ;Name and file
   Name "uGet Chrome Wrapper"
-  OutFile "uget-chrome-wrapper.exe"
+  OutFile "uget-chrome-wrapper_${_VERSION}.exe"
 
   ;Default installation folder
   InstallDir $PROGRAMFILES\uget-chrome-wrapper
@@ -128,7 +129,16 @@
 
   !insertmacro MUI_LANGUAGE "English"
 
-
+;--------------------------------
+;Version Information
+  VIProductVersion "${_VERSION}"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "uGet Chrome Wrapper"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "Comments" "Integrate uGet download manager with Google Chrome, Chromium, Vivaldi, Opera and Mozilla Firefox"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "Gobinath"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "Copyright 2016 Gobinath"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "uGet Chrome Wrapper installer"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "${_VERSION}"
+  
 ;--------------------------------
 ; The stuff to install
 Section "uget-chrome-wrapper (required)"
@@ -145,28 +155,42 @@ Section "uget-chrome-wrapper (required)"
 
 	; Replace \ by \\ in the installation path
 	${StrRep} $0 "$INSTDIR" "\" "\\"
+	
+	; Create the uget-chrome-wrapper.bat file
+	FileOpen $9 $INSTDIR\uget-chrome-wrapper.bat w ;Opens a Empty File an fills it
+	FileWrite $9 '@echo off$\r$\ncall python "$0\\uget-chrome-wrapper.py"$\r$\n'
+	FileClose $9 ;Closes the filled file
 
 	; Update the com.javahelps.ugetchromewrapper.json file
 	FileOpen $9 $INSTDIR\com.javahelps.ugetchromewrapper.json w ;Opens a Empty File an fills it
-	FileWrite $9 '{"name":"com.javahelps.ugetchromewrapper","description":"Integrate uGet with Google Chrome","path":"$0\\uget-chrome-wrapper.py","type":"stdio","allowed_origins":["chrome-extension://efjgjleilhflffpbnkaofpmdnajdpepi/","chrome-extension://akcbnhoidebjpiefdkmaaicfgdpbnoac/"]}$\r$\n'
+	FileWrite $9 '{"name":"com.javahelps.ugetchromewrapper","description":"Integrate uGet with Google Chrome","path":"$0\\uget-chrome-wrapper.bat","type":"stdio","allowed_origins":["chrome-extension://efjgjleilhflffpbnkaofpmdnajdpepi/","chrome-extension://akcbnhoidebjpiefdkmaaicfgdpbnoac/"]}$\r$\n'
 	FileClose $9 ;Closes the filled file
 
-  ; Update the com.javahelps.ugetfirefoxwrapper.json file
+    ; Update the com.javahelps.ugetfirefoxwrapper.json file
 	FileOpen $9 $INSTDIR\com.javahelps.ugetfirefoxwrapper.json w ;Opens a Empty File an fills it
-	FileWrite $9 '{"name":"com.javahelps.ugetfirefoxwrapper","description":"Integrate uGet with Mozilla Firefox","path":"$0\\uget-chrome-wrapper.py","type":"stdio","allowed_extensions":["uget-integration@slgobinath"]}$\r$\n'
+	FileWrite $9 '{"name":"com.javahelps.ugetfirefoxwrapper","description":"Integrate uGet with Mozilla Firefox","path":"$0\\uget-chrome-wrapper.bat","type":"stdio","allowed_extensions":["uget-integration@slgobinath"]}$\r$\n'
 	FileClose $9 ;Closes the filled file
+	
+	; Put the icon
+	File "uget-icon.ico"
 
 	; Write the installation path into the registry
 	WriteRegStr HKLM SOFTWARE\uget-chrome-wrapper "Install_Dir" "$INSTDIR"
 	WriteRegStr HKCU "SOFTWARE\Google\Chrome\NativeMessagingHosts\com.javahelps.ugetchromewrapper" "" "$INSTDIR\com.javahelps.ugetchromewrapper.json"
 	WriteRegStr HKLM "SOFTWARE\Google\Chrome\NativeMessagingHosts\com.javahelps.ugetchromewrapper" "" "$INSTDIR\com.javahelps.ugetchromewrapper.json"
-  WriteRegStr HKCU "SOFTWARE\Mozilla\NativeMessagingHosts\com.javahelps.ugetfirefoxwrapper" "" "$INSTDIR\com.javahelps.ugetfirefoxwrapper.json"
+	WriteRegStr HKCU "SOFTWARE\Mozilla\NativeMessagingHosts\com.javahelps.ugetfirefoxwrapper" "" "$INSTDIR\com.javahelps.ugetfirefoxwrapper.json"
 	WriteRegStr HKLM "SOFTWARE\Mozilla\NativeMessagingHosts\com.javahelps.ugetfirefoxwrapper" "" "$INSTDIR\com.javahelps.ugetfirefoxwrapper.json"
 
 
 	; Write the uninstall keys for Windows
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\uget-chrome-wrapper" "DisplayName" "uGet Chrome Wrapper"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\uget-chrome-wrapper" "Publisher" "Gobinath"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\uget-chrome-wrapper" "HelpLink" "https://github.com/slgobinath/uget-chrome-wrapper/issues"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\uget-chrome-wrapper" "URLUpdateInfo" "https://github.com/slgobinath/uget-chrome-wrapper/releases"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\uget-chrome-wrapper" "URLInfoAbout" "https://slgobinath.github.io/uget-chrome-wrapper/"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\uget-chrome-wrapper" "DisplayVersion" "${_VERSION}"
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\uget-chrome-wrapper" "UninstallString" '"$INSTDIR\uninstall.exe"'
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\uget-chrome-wrapper" "DisplayIcon" "$INSTDIR\uget-icon.ico,0"
 	WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\uget-chrome-wrapper" "NoModify" 1
 	WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\uget-chrome-wrapper" "NoRepair" 1
 	WriteUninstaller "uninstall.exe"
@@ -182,14 +206,17 @@ Section "Uninstall"
 	; Remove registry keys
 	DeleteRegKey HKCU "SOFTWARE\Google\Chrome\NativeMessagingHosts\com.javahelps.ugetchromewrapper"
 	DeleteRegKey HKLM "SOFTWARE\Google\Chrome\NativeMessagingHosts\com.javahelps.ugetchromewrapper"
-  DeleteRegKey HKCU "SOFTWARE\Mozilla\NativeMessagingHosts\com.javahelps.ugetfirefoxwrapper"
+	DeleteRegKey HKCU "SOFTWARE\Mozilla\NativeMessagingHosts\com.javahelps.ugetfirefoxwrapper"
 	DeleteRegKey HKLM "SOFTWARE\Mozilla\NativeMessagingHosts\com.javahelps.ugetfirefoxwrapper"
 	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\uget-chrome-wrapper"
 	DeleteRegKey HKLM SOFTWARE\uget-chrome-wrapper
 
 	; Remove files and uninstaller
 	Delete $INSTDIR\uget-chrome-wrapper.py
+	Delete $INSTDIR\uget-chrome-wrapper.bat
 	Delete $INSTDIR\com.javahelps.ugetchromewrapper.json
+	Delete $INSTDIR\com.javahelps.ugetfirefoxwrapper.json
+	Delete $INSTDIR\uget-icon.ico
 	Delete $INSTDIR\uninstall.exe
 
 	; Remove directories used
