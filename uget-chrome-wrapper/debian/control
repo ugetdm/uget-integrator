@@ -10,4 +10,4 @@ Package: uget-chrome-wrapper
 Architecture: any
 Depends: uget (>= 2.0.2), python3 (>= 3.4.0)
 Description: uGet Chrome Wrapper
- Integrate uGet Download manager with Google Chrome, Chromium, Vivaldi and Opera
+ Integrate uGet Download manager with Google Chrome, Chromium, Vivaldi, Opera and Firefox

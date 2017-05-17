@@ -30,8 +30,8 @@ UGET_COMMAND = "uget-gtk"
 VERSION = "2.0.4"
 
 logger = logging.getLogger()
-log_file_path = join(expanduser('~'), 'uget-chrome-wrapper.log')
-logging.basicConfig(format='%(asctime)s [%(levelname)s]: %(message)s', filename=log_file_path, filemode='a', level=logging.DEBUG)
+# log_file_path = join(expanduser('~'), 'uget-chrome-wrapper.log')
+# logging.basicConfig(format='%(asctime)s [%(levelname)s]: %(message)s', filename=log_file_path, filemode='a', level=logging.DEBUG)
 logger.propagate = False
 
 # Platform specific configuration
