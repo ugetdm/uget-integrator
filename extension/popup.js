@@ -30,7 +30,7 @@ try {
 		}
 	);
 } catch (ex) {
-	console.log('No firefox');
+	// Not Firefox
 	current_browser = chrome;
 }
 

@@ -18,16 +18,32 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+var current_browser = browser;
+
+try {
+	current_browser = browser;
+	current_browser.runtime.getBrowserInfo().then(
+		function(info) {
+			if (info.name === 'Firefox') {
+				// Do nothing
+			}
+		}
+	);
+} catch (ex) {
+	// Not Firefox
+	current_browser = chrome;
+}
+
 window.onkeydown = function(event) {
     if (event.keyCode == 45) { // Insert
-        browser.runtime.sendMessage({ message: 'disable' });
+        current_browser.runtime.sendMessage({ message: 'disable' });
     }
 };
 
 window.onkeyup = function(event) {
     if (event.keyCode == 45) { // Insert
-        browser.runtime.sendMessage({ message: 'enable' });
+        current_browser.runtime.sendMessage({ message: 'enable' });
     } else if (event.keyCode == 85 && event.ctrlKey && event.shiftKey) { // Ctrl + Shift + U
-        browser.runtime.sendMessage({ message: 'toggle' });
+        current_browser.runtime.sendMessage({ message: 'toggle' });
     }
 };
