@@ -18,7 +18,7 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-var current_browser = browser;
+var current_browser;
 
 try {
 	current_browser = browser;

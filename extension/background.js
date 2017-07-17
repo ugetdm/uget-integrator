@@ -71,7 +71,7 @@ try {
 
 chromeVersion = parseInt(chromeVersion);
 sendMessageToHost({
-    version: "2.0.5"
+    version: "2.0.6"
 });
 
 // Read the local storage for excluded keywords
