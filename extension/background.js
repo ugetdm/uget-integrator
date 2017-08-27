@@ -18,7 +18,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// TODO: LocalStorage support for Firefox (how does this work here?)
 
 var interruptDownloads = true;
 var ugetWrapperNotFound = true;
@@ -59,7 +58,8 @@ try {
     current_browser.runtime.getBrowserInfo().then(
         function(info) {
             if (info.name === 'Firefox') {
-                firefoxVersion = info.version.replace(/[ab]\d+/, '');
+                // Convert version string to int
+                firefoxVersion = parseInt(info.version.replace(/[ab]\d+/, '').split('.')[0]);
             }
         }
     );
@@ -71,7 +71,7 @@ try {
 
 chromeVersion = parseInt(chromeVersion);
 sendMessageToHost({
-    version: "2.0.6"
+    version: "2.0.7"
 });
 
 // Read the local storage for excluded keywords
@@ -152,6 +152,10 @@ current_browser.downloads.onCreated.addListener(function(downloadItem) {
         return;
     }
 
+    if("in_progress" !== downloadItem['state'].toString().toLowerCase()) {
+        return;
+    }
+
     var fileSize = downloadItem['fileSize'];
 
     var url = '';
@@ -174,7 +178,7 @@ current_browser.downloads.onCreated.addListener(function(downloadItem) {
     });
 
     message.url = url;
-    message.filename = downloadItem['filename'];
+    message.filename = downloadItem['filename'].replace(/^.*[\\\/]/, '');
     message.filesize = fileSize;
     message.referrer = downloadItem['referrer'];
     current_browser.cookies.getAll({ 'url': extractRootURL(url) }, parseCookies);
