@@ -33,7 +33,7 @@ sudo mkdir -p /usr/lib64/mozilla/native-messaging-hosts
 sudo wget https://raw.githubusercontent.com/slgobinath/uget-chrome-wrapper/v2.0.4/uget-chrome-wrapper/conf/com.javahelps.ugetfirefoxwrapper.json --output-document /usr/lib/mozilla/native-messaging-hosts/com.javahelps.ugetfirefoxwrapper.json
 
 # Download com.javahelps.ugetfirefoxwrapper.json to /usr/lib64/mozilla/native-messaging-hosts/com.javahelps.ugetfirefoxwrapper.json
-sudo wget https://raw.githubusercontent.com/slgobinath/uget-chrome-wrapper/v2.0.4/uget-chrome-wrapper/conf/com.javahelps.ugetfirefoxwrapper.json --output-document /usr/lib/mozilla/native-messaging-hosts/com.javahelps.ugetfirefoxwrapper.json
+sudo wget https://raw.githubusercontent.com/slgobinath/uget-chrome-wrapper/v2.0.4/uget-chrome-wrapper/conf/com.javahelps.ugetfirefoxwrapper.json --output-document /usr/lib64/mozilla/native-messaging-hosts/com.javahelps.ugetfirefoxwrapper.json
 
 echo "uget-chrome-wrapper is installed successfully!"
 echo "Please install the 'uGet Integration' extension and restart the browser"
