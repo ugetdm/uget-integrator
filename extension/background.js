@@ -71,7 +71,7 @@ try {
 
 chromeVersion = parseInt(chromeVersion);
 sendMessageToHost({
-    version: "2.0.7"
+    version: "2.0.8"
 });
 
 // Read the local storage for excluded keywords
@@ -164,7 +164,7 @@ current_browser.downloads.onCreated.addListener(function(downloadItem) {
     } else {
         url = downloadItem['url'];
     }
-    if (fileSize != -1 && fileSize < minFileSizeToInterrupt && !isWhiteListed(url)) {
+    if (fileSize < minFileSizeToInterrupt && !isWhiteListed(url)) {
         return;
     }
     if (isBlackListed(url)) {
