@@ -31,7 +31,7 @@ Please test uget-chrome-wrapper on your system and report any issues [here](http
 Please test uget-chrome-wrapper and create installers for your operating system
 
 ## History
-Version 2.0.4:
+Version 2.0.5:
  * Added download all links support
 
 Version 2.0.4:
