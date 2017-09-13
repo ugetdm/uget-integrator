@@ -28,7 +28,7 @@ from mimetypes import guess_extension
 cookie_filepath = join(tempfile.gettempdir(), 'uget_cookie')
 urls_filepath = join(tempfile.gettempdir(), 'uget_urls')
 UGET_COMMAND = "uget-gtk"
-VERSION = "2.0.4"
+VERSION = "2.0.5"
 
 logger = logging.getLogger()
 # log_file_path = join(expanduser('~'), 'uget-chrome-wrapper.log')
@@ -70,7 +70,6 @@ def extract_file_name(url):
 def send_message(message):
 
 	logger.info('Sending message: ' + str(message))
-
 	try:
 		# Write message size.
 		sys.stdout.buffer.write(struct.pack('I', len(message)))

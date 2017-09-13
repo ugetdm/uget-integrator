@@ -20,7 +20,7 @@ sudo rm -f /etc/opera/native-messaging-hosts/com.javahelps.ugetchromewrapper.jso
 sudo rm -f /usr/lib/mozilla/native-messaging-hosts/com.javahelps.ugetfirefoxwrapper.json
 
 # Remove /usr/lib64/mozilla/native-messaging-hosts/com.javahelps.ugetfirefoxwrapper.json
-sudo rm -f /usr/lib/mozilla/native-messaging-hosts/com.javahelps.ugetfirefoxwrapper.json
+sudo rm -f /usr/lib64/mozilla/native-messaging-hosts/com.javahelps.ugetfirefoxwrapper.json
 
 echo "uget-chrome-wrapper is uninstalled successfully!"
 echo "Please remove the 'uGet Integration' extension from your browser"

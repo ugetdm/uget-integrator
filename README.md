@@ -32,6 +32,9 @@ Please test uget-chrome-wrapper and create installers for your operating system
 
 ## History
 Version 2.0.4:
+ * Added download all links support
+
+Version 2.0.4:
  * Added cookie support
  * Added support to Mozilla Firefox
 

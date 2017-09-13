@@ -1,4 +1,6 @@
-uget-chrome-wrapper (2.0.4-1) xenial; urgency=medium
+uget-chrome-wrapper (2.0.5-1) xenial; urgency=medium
+
+  * Add batch download
 
   * Add cookie support
   

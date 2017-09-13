@@ -394,7 +394,7 @@ function sendMessageToHost(message) {
 function getState() {
     if (ugetWrapperNotFound || !ugetChromeWrapperVersion) {
         return 2;
-    } else if (!ugetChromeWrapperVersion.startsWith("2.")) {
+    } else if (!ugetChromeWrapperVersion.startsWith("2.0.5")) {
         return 1;
     } else {
         return 0;
