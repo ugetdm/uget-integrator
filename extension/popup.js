@@ -62,14 +62,32 @@ function saveChanges() {
 window.addEventListener('load', function(evt) {
 	// Show the system status
 	current_browser.runtime.getBackgroundPage(function(backgroundPage) {
-		var message = backgroundPage.getInfo().replace(/<[^>]*>?/g, '');
-		var label = 'error';
-		if (message.toLowerCase().startsWith("info")) {
-			label = 'info';
-		} else if (message.toLowerCase().startsWith("warn")) {
-			label = 'warn';
+		var state = backgroundPage.getState();
+		// if (state == 0) {
+		// 	document.getElementById('info').innerHTML = "Info: Found uGet and uget-chrome-wrapper";
+		// } else if (state == 1) {
+		// 	document.getElementById('warn').innerHTML = "Warning: Please update the uget-chrome-wrapper to the latest version";
+		// } else {
+		// 	document.getElementById('error').innerHTML = "Error: Unable to connect to the uget-chrome-wrapper";
+		// }
+		if (state == 0) {
+			// document.getElementById('info').innerHTML = "Info: Found uGet and uget-chrome-wrapper";
+			document.getElementById('info').style.display = 'block';
+			document.getElementById('warn').style.display = 'none';
+			document.getElementById('error').style.display = 'none';
+			var element = document.getElementById("element-id");
+			element.parentNode.removeChild(element);
+		} else if (state == 1) {
+			// document.getElementById('warn').innerHTML = "Warning: Please update the uget-chrome-wrapper to the latest version";
+			document.getElementById('info').style.display = 'none';
+			document.getElementById('warn').style.display = 'block';
+			document.getElementById('error').style.display = 'none';
+		} else {
+			// document.getElementById('error').innerHTML = "Error: Unable to connect to the uget-chrome-wrapper";
+			document.getElementById('info').style.display = 'none';
+			document.getElementById('warn').style.display = 'none';
+			document.getElementById('error').style.display = 'block';
 		}
-		document.getElementById(label).innerHTML = message;
 	});
 
 	let interrupt = (localStorage["uget-interrupt"] == "true");

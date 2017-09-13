@@ -111,7 +111,8 @@ var message = {
     filename: '',
     filesize: '',
     referrer: '',
-    postdata: ''
+    postdata: '',
+    batch: false
 };
 
 // Listen to the key press
@@ -136,12 +137,29 @@ current_browser.contextMenus.create({
     contexts: ['link']
 });
 
+current_browser.contextMenus.create({
+    title: 'Download all links with uGet',
+    id: "download_all_links_with_uget",
+    contexts: ['page']
+});
+  
 current_browser.contextMenus.onClicked.addListener(function(info, tab) {
     "use strict";
     if (info.menuItemId === "download_with_uget") {
         message.url = info['linkUrl'];
         message.referrer = info['pageUrl'];
         current_browser.cookies.getAll({ 'url': extractRootURL(info.pageUrl) }, parseCookies);
+    } else if (info.menuItemId === "download_all_links_with_uget") {
+        var dataToWebPage = {text: 'test', foo: 1, bar: false};
+        current_browser.tabs.executeScript(null, {file: 'extract.js'}, function(results) {
+            // Do nothing
+            if(results[0].success) {
+                message.url = results[0].urls;
+                message.referrer = info['pageUrl'];
+                message.batch = true;
+                current_browser.cookies.getAll({ 'url': extractRootURL(info.pageUrl) }, parseCookies);
+            }
+        });
     }
 });
 
@@ -371,15 +389,15 @@ function sendMessageToHost(message) {
 }
 
 /**
- * Create a meaningful message of the internal state.
+ * Return the internal state.
  */
-function getInfo() {
+function getState() {
     if (ugetWrapperNotFound || !ugetChromeWrapperVersion) {
-        return "Error: Unable to connect to the uget-chrome-wrapper";
+        return 2;
     } else if (!ugetChromeWrapperVersion.startsWith("2.")) {
-        return "Warning: Please update the uget-chrome-wrapper to the latest version";
+        return 1;
     } else {
-        return "Info: Found uGet: " + ugetVersion + " and uget-chrome-wrapper: " + ugetChromeWrapperVersion;
+        return 0;
     }
 }
 
@@ -393,6 +411,7 @@ function clearMessage() {
     message.filesize = '';
     message.referrer = '';
     message.useragent = '';
+    message.batch = false;
 }
 
 /**

@@ -60,6 +60,14 @@ hr {
     padding: 0;
 }
 
+#footer {
+    display: table;
+    text-align: center;
+    margin: 0 auto;
+    line-height: 50%;
+    color: #aaa;
+}
+
 #info {
     display: table;
     text-align: center;

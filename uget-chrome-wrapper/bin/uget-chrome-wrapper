@@ -26,6 +26,7 @@ from os.path import splitext, basename, join, expanduser
 from mimetypes import guess_extension
 
 cookie_filepath = join(tempfile.gettempdir(), 'uget_cookie')
+urls_filepath = join(tempfile.gettempdir(), 'uget_urls')
 UGET_COMMAND = "uget-gtk"
 VERSION = "2.0.4"
 
@@ -79,6 +80,45 @@ def send_message(message):
 	except Exception as e:
 		logger.error('Error in sending message: ' + str(e))
 
+def download_all_links(data):
+	"""
+	Extract all links from the html page and download them.
+	"""
+	urls = data['url']
+	cookie = data['cookies']
+	try:
+		logger.debug('Writing links to file')
+		with open(urls_filepath, 'w') as url_file:
+			url_file.write(urls)
+		
+		command = [UGET_COMMAND, "--input-file=" + urls_filepath]
+		use_cookie_file = False
+		if cookie:
+			try:
+				with open(cookie_filepath, 'w') as cookie_file:
+					cookie_file.write(cookie)
+				use_cookie_file = True
+			except Exception as e:
+				pass
+		
+		if use_cookie_file:
+			command.append("--http-cookie-file=" + cookie_filepath)
+		# Pass the parameters to uGet
+		subprocess.call(command)
+
+		if use_cookie_file:
+			try:
+				os.remove(cookie_filepath)
+			except Exception as e:
+				pass
+		
+		try:
+			os.remove(urls_filepath)
+		except Exception as e:
+			pass
+	except Exception as e:
+		pass
+
 # Read messages from the webapp.
 def read_message():
 
@@ -110,7 +150,10 @@ def read_message():
 			data = json.loads(text)
 			url = data['url']
 
-			if url:
+			if url != "":
+				if data['batch']:
+					download_all_links(data)
+					return
 				use_cookie_file = False
 				filename = data['filename']
 				cookie = data['cookies']
