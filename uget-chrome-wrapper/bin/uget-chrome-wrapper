@@ -172,10 +172,6 @@ def read_message():
 				if referer:
 					command.append("--http-referer=" + referer)
 
-				# Add the file name
-				if filename:
-					command.append("--filename=" + filename)
-
 				# Add the cookie file
 				if use_cookie_file:
 					command.append("--http-cookie-file=" + cookie_filepath)
