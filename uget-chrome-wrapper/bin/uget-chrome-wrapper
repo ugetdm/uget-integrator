@@ -157,7 +157,7 @@ def read_message():
 				filename = data['filename']
 				cookie = data['cookies']
 				referer = data['referrer']
-				command = [UGET_COMMAND, "--filename=" + filename]
+				command = [UGET_COMMAND]
 				if cookie:
 					try:
 						with open(cookie_filepath, 'w') as cookie_file:
@@ -171,6 +171,10 @@ def read_message():
 				# Add the referer url
 				if referer:
 					command.append("--http-referer=" + referer)
+
+				# Add the file name
+				if filename:
+					command.append("--filename=" + filename)
 
 				# Add the cookie file
 				if use_cookie_file:
