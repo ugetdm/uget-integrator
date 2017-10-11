@@ -156,10 +156,8 @@ Section "uget-chrome-wrapper (required)"
 	; Replace \ by \\ in the installation path
 	${StrRep} $0 "$INSTDIR" "\" "\\"
 	
-	; Create the uget-chrome-wrapper.bat file
-	FileOpen $9 $INSTDIR\uget-chrome-wrapper.bat w ;Opens a Empty File an fills it
-	FileWrite $9 '@echo off$\r$\ncall python "$0\\uget-chrome-wrapper.py"$\r$\n'
-	FileClose $9 ;Closes the filled file
+	; Put the uget-chrome-wrapper.bat file
+	File "..\..\uget-chrome-wrapper\windows\uget-chrome-wrapper.bat"
 
 	; Update the com.javahelps.ugetchromewrapper.json file
 	FileOpen $9 $INSTDIR\com.javahelps.ugetchromewrapper.json w ;Opens a Empty File an fills it
