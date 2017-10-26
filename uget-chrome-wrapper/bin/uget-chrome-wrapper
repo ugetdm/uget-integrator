@@ -21,6 +21,7 @@
 # sudo apt install python3-urllib3
 import struct, sys, threading, logging, json, urllib, subprocess, tempfile
 from urllib.parse import urlparse
+from urllib.parse import unquote
 from urllib.request import urlopen
 from os.path import splitext, basename, join, expanduser
 from mimetypes import guess_extension
@@ -174,7 +175,7 @@ def read_message():
 
 				# Add the file name
 				if filename:
-					command.append("--filename=" + filename)
+					command.append("--filename=" + unquote(filename))
 
 				# Add the cookie file
 				if use_cookie_file:

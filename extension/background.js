@@ -198,7 +198,7 @@ current_browser.downloads.onCreated.addListener(function(downloadItem) {
     });
 
     message.url = url;
-    message.filename = downloadItem['filename'].replace(/^.*[\\\/]/, '');
+    message.filename = unescape(downloadItem['filename']);
     message.filesize = fileSize;
     message.referrer = downloadItem['referrer'];
     current_browser.cookies.getAll({ 'url': extractRootURL(url) }, parseCookies);
@@ -290,7 +290,7 @@ current_browser.webRequest.onHeadersReceived.addListener(function(details) {
             disposition = details.responseHeaders[i].value;
             if (disposition.lastIndexOf('filename') != -1) {
                 message.filename = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)[1];
-                message.filename = message.filename.replace(/["']/g, "");
+                message.filename = unescape(message.filename);
                 interruptDownload = true;
             }
         } else if (details.responseHeaders[i].name.toLowerCase() == 'content-type') {

@@ -18,15 +18,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
- extract();
+extract();
+
 function extract() {
     var txt = '';
-    
+    urls = []
     for (var i = 0; i < document.links.length; i++) {
         url = document.links[i].href;
         var valid = /^(ftp|http|https):\/\/[^ "]+$/.test(url);
-        if(valid && txt.indexOf(url) == -1) {
-            txt += url + '\n';
+        if(valid) {
+            var decodedURL = unescape(url);
+            if(urls.indexOf(decodedURL) < 0) {
+                urls.push(decodedURL);
+                txt += url + '\n';
+            }
         }
     }
     
