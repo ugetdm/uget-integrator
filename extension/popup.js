@@ -35,19 +35,15 @@ try {
 }
 
 function saveChanges() {
-	var keywordsToExclude = document.getElementById("keywordsToExclude").value;
-	var keywordsToInclude = document.getElementById("keywordsToInclude").value;
+	var keywordsToExclude = document.getElementById("keywordsToExclude").value.trim();
+	var keywordsToInclude = document.getElementById("keywordsToInclude").value.trim();
 	var interrupt = document.getElementById('chk-interrupt').checked;
 	var minFileSize = parseInt(document.getElementById("fileSize").value) * 1024;
 	if (isNaN(minFileSize)) {
 		minFileSize = 300 * 1024;
 	} else if(minFileSize < 0) {
-		minFileSize = 0;
+		minFileSize = -1024;	// Which is -1 KB
 	}
-
-	localStorage["uget-keywords-exclude"] = keywordsToExclude;
-	localStorage["uget-keywords-include"] = keywordsToInclude;
-	localStorage["uget-min-file-size"] = minFileSize;
 
 	current_browser.runtime.getBackgroundPage(function(backgroundPage) {
 		backgroundPage.updateKeywords(keywordsToInclude, keywordsToExclude);
@@ -56,6 +52,7 @@ function saveChanges() {
 	});
 
 	window.close();
+	alert(document.getElementById("fileSize").value);
 }
 
 // When the popup HTML has loaded
@@ -63,13 +60,6 @@ window.addEventListener('load', function(evt) {
 	// Show the system status
 	current_browser.runtime.getBackgroundPage(function(backgroundPage) {
 		var state = backgroundPage.getState();
-		// if (state == 0) {
-		// 	document.getElementById('info').innerHTML = "Info: Found uGet and uget-chrome-wrapper";
-		// } else if (state == 1) {
-		// 	document.getElementById('warn').innerHTML = "Warning: Please update the uget-chrome-wrapper to the latest version";
-		// } else {
-		// 	document.getElementById('error').innerHTML = "Error: Unable to connect to the uget-chrome-wrapper";
-		// }
 		if (state == 0) {
 			// document.getElementById('info').innerHTML = "Info: Found uGet and uget-chrome-wrapper";
 			document.getElementById('info').style.display = 'block';
@@ -90,10 +80,12 @@ window.addEventListener('load', function(evt) {
 		}
 	});
 
-	let interrupt = (localStorage["uget-interrupt"] == "true");
+	let interrupt = (current_browser.storage.sync["uget-interrupt"] == "true");
 	document.getElementById('save').addEventListener('click', saveChanges);
-	document.getElementById('keywordsToExclude').value = localStorage["uget-keywords-exclude"];
-	document.getElementById('keywordsToInclude').value = localStorage["uget-keywords-include"];
-	document.getElementById('fileSize').value = localStorage["uget-min-file-size"] / 1024;
-	document.getElementById('chk-interrupt').checked = interrupt;
+	current_browser.storage.sync.get(function(items) {
+		document.getElementById('keywordsToExclude').value = items["uget-keywords-exclude"];
+		document.getElementById('keywordsToInclude').value = items["uget-keywords-include"];
+		document.getElementById('fileSize').value = parseInt(items["uget-min-file-size"]) / 1024;
+		document.getElementById('chk-interrupt').checked = items["uget-interrupt"] == "true";
+	});
 });

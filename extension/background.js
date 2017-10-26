@@ -74,35 +74,37 @@ sendMessageToHost({
     version: "2.0.9"
 });
 
-// Read the local storage for excluded keywords
-if (localStorage["uget-keywords-exclude"]) {
-    keywordsToExclude = localStorage["uget-keywords-exclude"].split(/[\s,]+/);
-} else {
-    localStorage["uget-keywords-exclude"] = '';
-}
+// Read the storage for excluded keywords
+current_browser.storage.sync.get(function(items) {
+    if (items["uget-keywords-exclude"]) {
+        keywordsToExclude = items["uget-keywords-exclude"].split(/[\s,]+/);
+    } else {
+        current_browser.storage.sync.set({"uget-keywords-exclude": ''});
+    }
 
-// Read the local storage for included keywords
-if (localStorage["uget-keywords-include"]) {
-    keywordsToInclude = localStorage["uget-keywords-include"].split(/[\s,]+/);
-} else {
-    localStorage["uget-keywords-include"] = '';
-}
+    // Read the local storage for included keywords
+    if (items["uget-keywords-include"]) {
+        keywordsToInclude = items["uget-keywords-include"].split(/[\s,]+/);
+    } else {
+        current_browser.storage.sync.set({"uget-keywords-include": ''});
+    }
 
-// Read the local storage for the minimum file-size to interrupt
-if (localStorage["uget-min-file-size"]) {
-    minFileSizeToInterrupt = parseInt(localStorage["uget-min-file-size"]);
-} else {
-    localStorage["uget-min-file-size"] = minFileSizeToInterrupt;
-}
+    // Read the local storage for the minimum file-size to interrupt
+    if (items["uget-min-file-size"]) {
+        minFileSizeToInterrupt = parseInt(items["uget-min-file-size"]);
+    } else {
+        current_browser.storage.sync.set({"uget-min-file-size": minFileSizeToInterrupt});
+    }
 
-// Read the local storage for enabled flag
-if (!localStorage["uget-interrupt"]) {
-    localStorage["uget-interrupt"] = 'true';
-} else {
-    var interrupt = (localStorage["uget-interrupt"] == "true");
-    setInterruptDownload(interrupt);
-}
-
+    // Read the local storage for enabled flag
+    if (!items["uget-interrupt"]) {
+        // Keep the value string
+        current_browser.storage.sync.set({"uget-interrupt": 'true'});
+    } else {
+        var interrupt = (items["uget-interrupt"] == "true");
+        setInterruptDownload(interrupt);
+    }
+});
 // Message format to send the download information to the uget-chrome-wrapper
 var message = {
     url: '',
@@ -464,6 +466,8 @@ function parseCookies(cookies_arr) {
 function updateKeywords(include, exclude) {
     keywordsToInclude = include.split(/[\s,]+/);
     keywordsToExclude = exclude.split(/[\s,]+/);
+    current_browser.storage.sync.set({"uget-keywords-include": include});
+    current_browser.storage.sync.set({"uget-keywords-exclude": exclude});
 }
 
 /**
@@ -472,6 +476,7 @@ function updateKeywords(include, exclude) {
  */
 function updateMinFileSize(size) {
     minFileSizeToInterrupt = size;
+    current_browser.storage.sync.set({"uget-min-file-size": size});
 }
 
 /**
@@ -519,6 +524,6 @@ function setInterruptDownload(interrupt, writeToStorage) {
         });
     }
     if (writeToStorage) {
-        localStorage["uget-interrupt"] = interrupt.toString();
+        current_browser.storage.sync.set({"uget-interrupt": interrupt.toString()});
     }
 }
