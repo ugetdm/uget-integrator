@@ -501,7 +501,7 @@ function isBlackListed(url) {
  * Check whether to interrupt the given url or not.
  */
 function isWhiteListed(url) {
-    if (url.includes("videoplayback")) {
+    if (url.includes("video")) {
         return true;
     }
     for (var keyword of keywordsToInclude) {
