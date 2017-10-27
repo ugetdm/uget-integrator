@@ -52,7 +52,6 @@ function saveChanges() {
 	});
 
 	window.close();
-	alert(document.getElementById("fileSize").value);
 }
 
 // When the popup HTML has loaded

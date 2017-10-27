@@ -168,6 +168,9 @@ def read_message():
 						pass
 				if not filename:
 					filename = extract_file_name(url)
+				else:
+					# Sometimes Firefox sends complete path
+					filename = basename(filename)
 
 				# Add the referer url
 				if referer:
@@ -184,6 +187,7 @@ def read_message():
 				# Add the url
 				command.append(url)
 
+				logger.debug('Execute command: ' + str(command))
 				# Pass the parameters to uGet
 				subprocess.call(command)
 
