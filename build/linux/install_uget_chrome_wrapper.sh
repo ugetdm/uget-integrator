@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo "Installing uget-chrome-wrapper 2.0.5"
+echo "Installing uget-chrome-wrapper 2.0.6"
 
 # Download uget-chrome-wrapper to /usr/bin/uget-chrome-wrapper
 sudo wget https://raw.githubusercontent.com/slgobinath/uget-chrome-wrapper/v2.0.5/uget-chrome-wrapper/bin/uget-chrome-wrapper --output-document /usr/bin/uget-chrome-wrapper

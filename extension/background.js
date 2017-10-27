@@ -71,7 +71,7 @@ try {
 
 chromeVersion = parseInt(chromeVersion);
 sendMessageToHost({
-    version: "2.0.9"
+    version: "2.1.0"
 });
 
 // Read the storage for excluded keywords
@@ -396,7 +396,7 @@ function sendMessageToHost(message) {
 function getState() {
     if (ugetWrapperNotFound || !ugetChromeWrapperVersion) {
         return 2;
-    } else if (!ugetChromeWrapperVersion.startsWith("2.0.5")) {
+    } else if (!ugetChromeWrapperVersion.startsWith("2.0.6")) {
         return 1;
     } else {
         return 0;

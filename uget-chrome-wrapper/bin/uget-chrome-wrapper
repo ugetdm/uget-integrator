@@ -29,7 +29,7 @@ from mimetypes import guess_extension
 cookie_filepath = join(tempfile.gettempdir(), 'uget_cookie')
 urls_filepath = join(tempfile.gettempdir(), 'uget_urls')
 UGET_COMMAND = "uget-gtk"
-VERSION = "2.0.5"
+VERSION = "2.0.6"
 
 logger = logging.getLogger()
 # log_file_path = join(expanduser('~'), 'uget-chrome-wrapper.log')
