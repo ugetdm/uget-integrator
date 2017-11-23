@@ -79,27 +79,27 @@ current_browser.storage.sync.get(function(items) {
     if (items["uget-keywords-exclude"]) {
         keywordsToExclude = items["uget-keywords-exclude"].split(/[\s,]+/);
     } else {
-        current_browser.storage.sync.set({"uget-keywords-exclude": ''});
+        current_browser.storage.sync.set({ "uget-keywords-exclude": '' });
     }
 
     // Read the local storage for included keywords
     if (items["uget-keywords-include"]) {
         keywordsToInclude = items["uget-keywords-include"].split(/[\s,]+/);
     } else {
-        current_browser.storage.sync.set({"uget-keywords-include": ''});
+        current_browser.storage.sync.set({ "uget-keywords-include": '' });
     }
 
     // Read the local storage for the minimum file-size to interrupt
     if (items["uget-min-file-size"]) {
         minFileSizeToInterrupt = parseInt(items["uget-min-file-size"]);
     } else {
-        current_browser.storage.sync.set({"uget-min-file-size": minFileSizeToInterrupt});
+        current_browser.storage.sync.set({ "uget-min-file-size": minFileSizeToInterrupt });
     }
 
     // Read the local storage for enabled flag
     if (!items["uget-interrupt"]) {
         // Keep the value string
-        current_browser.storage.sync.set({"uget-interrupt": 'true'});
+        current_browser.storage.sync.set({ "uget-interrupt": 'true' });
     } else {
         var interrupt = (items["uget-interrupt"] == "true");
         setInterruptDownload(interrupt);
@@ -144,7 +144,7 @@ current_browser.contextMenus.create({
     id: "download_all_links_with_uget",
     contexts: ['page']
 });
-  
+
 current_browser.contextMenus.onClicked.addListener(function(info, tab) {
     "use strict";
     if (info.menuItemId === "download_with_uget") {
@@ -152,10 +152,10 @@ current_browser.contextMenus.onClicked.addListener(function(info, tab) {
         message.referrer = info['pageUrl'];
         current_browser.cookies.getAll({ 'url': extractRootURL(info.pageUrl) }, parseCookies);
     } else if (info.menuItemId === "download_all_links_with_uget") {
-        var dataToWebPage = {text: 'test', foo: 1, bar: false};
-        current_browser.tabs.executeScript(null, {file: 'extract.js'}, function(results) {
+        var dataToWebPage = { text: 'test', foo: 1, bar: false };
+        current_browser.tabs.executeScript(null, { file: 'extract.js' }, function(results) {
             // Do nothing
-            if(results[0].success) {
+            if (results[0].success) {
                 message.url = results[0].urls;
                 message.referrer = info['pageUrl'];
                 message.batch = true;
@@ -172,7 +172,7 @@ current_browser.downloads.onCreated.addListener(function(downloadItem) {
         return;
     }
 
-    if("in_progress" !== downloadItem['state'].toString().toLowerCase()) {
+    if ("in_progress" !== downloadItem['state'].toString().toLowerCase()) {
         return;
     }
 
@@ -198,7 +198,7 @@ current_browser.downloads.onCreated.addListener(function(downloadItem) {
     });
 
     message.url = url;
-    message.filename = unescape(downloadItem['filename']);
+    message.filename = unescape(downloadItem['filename']).replace(/\"/g, "");
     message.filesize = fileSize;
     message.referrer = downloadItem['referrer'];
     current_browser.cookies.getAll({ 'url': extractRootURL(url) }, parseCookies);
@@ -290,7 +290,7 @@ current_browser.webRequest.onHeadersReceived.addListener(function(details) {
             disposition = details.responseHeaders[i].value;
             if (disposition.lastIndexOf('filename') != -1) {
                 message.filename = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)[1];
-                message.filename = unescape(message.filename);
+                message.filename = unescape(message.filename).replace(/\"/g, "");
                 interruptDownload = true;
             }
         } else if (details.responseHeaders[i].name.toLowerCase() == 'content-type') {
@@ -466,8 +466,8 @@ function parseCookies(cookies_arr) {
 function updateKeywords(include, exclude) {
     keywordsToInclude = include.split(/[\s,]+/);
     keywordsToExclude = exclude.split(/[\s,]+/);
-    current_browser.storage.sync.set({"uget-keywords-include": include});
-    current_browser.storage.sync.set({"uget-keywords-exclude": exclude});
+    current_browser.storage.sync.set({ "uget-keywords-include": include });
+    current_browser.storage.sync.set({ "uget-keywords-exclude": exclude });
 }
 
 /**
@@ -476,7 +476,7 @@ function updateKeywords(include, exclude) {
  */
 function updateMinFileSize(size) {
     minFileSizeToInterrupt = size;
-    current_browser.storage.sync.set({"uget-min-file-size": size});
+    current_browser.storage.sync.set({ "uget-min-file-size": size });
 }
 
 /**
@@ -527,6 +527,6 @@ function setInterruptDownload(interrupt, writeToStorage) {
         });
     }
     if (writeToStorage) {
-        current_browser.storage.sync.set({"uget-interrupt": interrupt.toString()});
+        current_browser.storage.sync.set({ "uget-interrupt": interrupt.toString() });
     }
 }
