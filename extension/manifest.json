@@ -17,18 +17,15 @@
         "default_icon": "icon_32.png",
         "default_popup": "popup.html"
     },
-    "content_scripts": [{
-        "all_frames": true,
-        "js": [
-            "content.js",
-            "extract.js"
-        ],
-        "matches": [
-            "http://*/*",
-            "https://*/*"
-        ],
-        "run_at": "document_start"
-    }],
+    "commands": {
+        "toggle-interruption": {
+            "suggested_key": {
+                "default": "Ctrl+Shift+U",
+                "mac": "Command+Shift+U"
+            },
+            "description": "Toggle interruption"
+        }
+    },
     "description": "uGet Browser Integration extension replaces default download manager by uGet Download Manager.",
     "homepage_url": "https://slgobinath.github.io/uget-chrome-wrapper",
     "icons": {

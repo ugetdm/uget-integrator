@@ -69,6 +69,13 @@ try {
     hostName = 'com.javahelps.ugetchromewrapper';
 }
 
+current_browser.commands.onCommand.addListener(function(command) {
+    if ("toggle-interruption" === command) {
+        // Toggle
+        setInterruptDownload(!interruptDownloads, true);
+    }
+});
+
 chromeVersion = parseInt(chromeVersion);
 sendMessageToHost({
     version: "2.1.0"
@@ -117,21 +124,6 @@ var message = {
     batch: false
 };
 
-// Listen to the key press
-current_browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    var msg = request.message;
-    if (msg === 'enable') {
-        // Temporarily enable
-        setInterruptDownload(true);
-    } else if (msg == 'disable') {
-        // Temporarily disable
-        setInterruptDownload(false);
-    } else {
-        // Toggle
-        setInterruptDownload(!interruptDownloads, true);
-    }
-});
-
 // Add to Chrome context menu
 current_browser.contextMenus.create({
     title: 'Download with uGet',
@@ -152,7 +144,6 @@ current_browser.contextMenus.onClicked.addListener(function(info, tab) {
         message.referrer = info['pageUrl'];
         current_browser.cookies.getAll({ 'url': extractRootURL(info.pageUrl) }, parseCookies);
     } else if (info.menuItemId === "download_all_links_with_uget") {
-        var dataToWebPage = { text: 'test', foo: 1, bar: false };
         current_browser.tabs.executeScript(null, { file: 'extract.js' }, function(results) {
             // Do nothing
             if (results[0].success) {
