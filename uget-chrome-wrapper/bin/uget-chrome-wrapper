@@ -19,7 +19,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # sudo apt install python3-urllib3
-import struct, sys, threading, logging, json, urllib, subprocess, tempfile
+import struct
+import sys
+import threading
+import logging
+import json
+import urllib
+import subprocess
+import tempfile
 from urllib.parse import urlparse
 from urllib.parse import unquote
 from urllib.request import urlopen
@@ -29,7 +36,7 @@ from mimetypes import guess_extension
 cookie_filepath = join(tempfile.gettempdir(), 'uget_cookie')
 urls_filepath = join(tempfile.gettempdir(), 'uget_urls')
 UGET_COMMAND = "uget-gtk"
-VERSION = "2.0.6"
+VERSION = "2.0.7"
 
 logger = logging.getLogger()
 # log_file_path = join(expanduser('~'), 'uget-chrome-wrapper.log')
@@ -38,167 +45,179 @@ logger.propagate = False
 
 # Platform specific configuration
 if sys.platform == 'win32':
-	# Set the default I/O mode to O_BINARY in windows
-	import os, msvcrt
-	msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
-	msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
-	UGET_COMMAND = 'uget'
+    # Set the default I/O mode to O_BINARY in windows
+    import os
+    import msvcrt
+    msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
+    msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
+    UGET_COMMAND = 'uget'
+
 
 def extract_file_name(url):
-	fileName = ''
-	if 'googlevideo.com/' in url and '&title=' in url:
-		# Youtube video
-		logger.debug('Found Youtube video')
-		url = urllib.parse.unquote(url)
-		url_components = url.split('&')
-		for smt in url_components:
-			if smt.startswith('title='):
-				title = smt.replace('title=', '').replace('+', ' ')
-			elif smt.startswith('mime='):
-				mime = smt.replace('mime=', '')
+    fileName = ''
+    if 'googlevideo.com/' in url and '&title=' in url:
+        # Youtube video
+        logger.debug('Found Youtube video')
+        url = urllib.parse.unquote(url)
+        url_components = url.split('&')
+        for smt in url_components:
+            if smt.startswith('title='):
+                title = smt.replace('title=', '').replace('+', ' ')
+            elif smt.startswith('mime='):
+                mime = smt.replace('mime=', '')
 
-		if title:
-			fileName = title
-			if mime:
-				fileName += guess_extension(mime)
-			logger.debug('Youtube filename: ' + fileName)
-	else:
-		fileName = basename(urlparse(url).path).replace('%20', ' ')
+        if title:
+            fileName = title
+            if mime:
+                fileName += guess_extension(mime)
+            logger.debug('Youtube filename: ' + fileName)
+    elif 'www.youtube.com/watch' in url:
+        fileName = ''
+    else:
+        fileName = basename(urlparse(url).path).replace('%20', ' ')
 
-	return fileName
+    return fileName
 
-# Send a message to the webapp.
+
 def send_message(message):
+    """
+    Send a message to the webapp.
+    """
+    logger.info('Sending message: ' + str(message))
+    try:
+        # Write message size.
+        sys.stdout.buffer.write(struct.pack('I', len(message)))
+        # Write the message itself.
+        sys.stdout.write(message)
+        sys.stdout.flush()
+    except Exception as e:
+        logger.error('Error in sending message: ' + str(e))
 
-	logger.info('Sending message: ' + str(message))
-	try:
-		# Write message size.
-		sys.stdout.buffer.write(struct.pack('I', len(message)))
-		# Write the message itself.
-		sys.stdout.write(message)
-		sys.stdout.flush()
-	except Exception as e:
-		logger.error('Error in sending message: ' + str(e))
 
 def download_all_links(data):
-	"""
-	Extract all links from the html page and download them.
-	"""
-	urls = data['url']
-	cookie = data['cookies']
-	try:
-		logger.debug('Writing links to file')
-		with open(urls_filepath, 'w') as url_file:
-			url_file.write(urls)
-		
-		command = [UGET_COMMAND, "--input-file=" + urls_filepath]
-		use_cookie_file = False
-		if cookie:
-			try:
-				with open(cookie_filepath, 'w') as cookie_file:
-					cookie_file.write(cookie)
-				use_cookie_file = True
-			except Exception as e:
-				pass
-		
-		if use_cookie_file:
-			command.append("--http-cookie-file=" + cookie_filepath)
-		# Pass the parameters to uGet
-		subprocess.call(command)
+    """
+    Extract all links from the html page and download them.
+    """
+    urls = data['url']
+    cookie = data['cookies']
+    try:
+        logger.debug('Writing links to file')
+        with open(urls_filepath, 'w') as url_file:
+            url_file.write(urls)
 
-		if use_cookie_file:
-			try:
-				os.remove(cookie_filepath)
-			except Exception as e:
-				pass
-		
-		try:
-			os.remove(urls_filepath)
-		except Exception as e:
-			pass
-	except Exception as e:
-		pass
+        command = [UGET_COMMAND, "--input-file=" + urls_filepath]
+        use_cookie_file = False
+        if cookie:
+            try:
+                with open(cookie_filepath, 'w') as cookie_file:
+                    cookie_file.write(cookie)
+                use_cookie_file = True
+            except Exception as e:
+                pass
 
-# Read messages from the webapp.
+        if use_cookie_file:
+            command.append("--http-cookie-file=" + cookie_filepath)
+        # Pass the parameters to uGet
+        subprocess.call(command)
+
+        if use_cookie_file:
+            try:
+                os.remove(cookie_filepath)
+            except Exception as e:
+                pass
+
+        try:
+            os.remove(urls_filepath)
+        except Exception as e:
+            pass
+    except Exception as e:
+        pass
+
+
 def read_message():
+    """
+    Read messages from the webapp.
+    """
+    logger.info('uget-chrome-wrapper is reading the message')
 
-	logger.info('uget-chrome-wrapper is reading the message')
+    while 1:
+        # Read the message length (first 4 bytes).
+        text_length_bytes = sys.stdin.buffer.read(4)
 
-	while 1:
-		# Read the message length (first 4 bytes).
-		text_length_bytes = sys.stdin.buffer.read(4)
+        # Unpack message length as 4 byte integer.
+        text_length = struct.unpack('i', text_length_bytes)[0]
 
-		# Unpack message length as 4 byte integer.
-		text_length = struct.unpack('i', text_length_bytes)[0]
+        logger.debug('Message length: ' + str(text_length))
 
-		logger.debug('Message length: ' + str(text_length))
+        # Read the text (JSON object) of the message.
+        text = sys.stdin.buffer.read(text_length).decode('utf-8')
 
-		# Read the text (JSON object) of the message.
-		text = sys.stdin.buffer.read(text_length).decode('utf-8')
+        logger.debug('Received message: ' + str(text))
 
-		logger.debug('Received message: ' + str(text))
+        if text:
+            if not 'url' in text:
+                uget_version = subprocess.Popen(
+                    [UGET_COMMAND + " --version"], shell=True, stdout=subprocess.PIPE, universal_newlines=True).communicate()[0]
+                uget_version = uget_version.replace(
+                    'uGet', '').replace('for GTK+', '').strip()
+                logger.debug('uGet version: ' + uget_version)
+                send_message('{"enable": true, "version": "' +
+                             VERSION + '", "uget": "' + uget_version + '"}')
+                return
 
-		if text:
-			if not 'url' in text:
-				uget_version = subprocess.Popen([UGET_COMMAND + " --version"], shell=True, stdout=subprocess.PIPE, universal_newlines=True).communicate()[0]
-				uget_version = uget_version.replace('uGet', '').replace('for GTK+', '').strip()
-				logger.debug('uGet version: ' + uget_version)
-				send_message('{"enable": true, "version": "' + VERSION + '", "uget": "' + uget_version + '"}')
-				return
+            send_message('{"state": "accepted"}')
+            data = json.loads(text)
+            url = data['url']
 
-			send_message('{"state": "accepted"}')
-			data = json.loads(text)
-			url = data['url']
+            if url != "":
+                if data['batch']:
+                    download_all_links(data)
+                    return
+                use_cookie_file = False
+                fileName = data['fileName']
+                cookie = data['cookies']
+                referer = data['referrer']
+                command = [UGET_COMMAND]
+                if cookie:
+                    try:
+                        with open(cookie_filepath, 'w') as cookie_file:
+                            cookie_file.write(cookie)
+                        use_cookie_file = True
+                    except Exception as e:
+                        pass
+                if not fileName:
+                    fileName = extract_file_name(url)
+                else:
+                    # Sometimes Firefox sends complete path
+                    fileName = basename(fileName)
 
-			if url != "":
-				if data['batch']:
-					download_all_links(data)
-					return
-				use_cookie_file = False
-				filename = data['filename']
-				cookie = data['cookies']
-				referer = data['referrer']
-				command = [UGET_COMMAND]
-				if cookie:
-					try:
-						with open(cookie_filepath, 'w') as cookie_file:
-							cookie_file.write(cookie)
-						use_cookie_file = True
-					except Exception as e:
-						pass
-				if not filename:
-					filename = extract_file_name(url)
-				else:
-					# Sometimes Firefox sends complete path
-					filename = basename(filename)
+                # Add the referer url
+                if referer:
+                    command.append("--http-referer=" + referer)
 
-				# Add the referer url
-				if referer:
-					command.append("--http-referer=" + referer)
+                # Add the file name
+                if fileName:
+                    command.append("--filename=" + unquote(fileName))
 
-				# Add the file name
-				if filename:
-					command.append("--filename=" + unquote(filename))
+                # Add the cookie file
+                if use_cookie_file:
+                    command.append("--http-cookie-file=" + cookie_filepath)
 
-				# Add the cookie file
-				if use_cookie_file:
-					command.append("--http-cookie-file=" + cookie_filepath)
+                # Add the url
+                command.append(url)
 
-				# Add the url
-				command.append(url)
+                logger.debug('Execute command: ' + str(command))
+                # Pass the parameters to uGet
+                subprocess.call(command)
 
-				logger.debug('Execute command: ' + str(command))
-				# Pass the parameters to uGet
-				subprocess.call(command)
+                if use_cookie_file:
+                    try:
+                        os.remove(cookie_filepath)
+                    except Exception as e:
+                        pass
 
-				if use_cookie_file:
-					try:
-						os.remove(cookie_filepath)
-					except Exception as e:
-						pass
-
-			sys.exit(0)
+            sys.exit(0)
 
 
 if __name__ == '__main__':
-	read_message()
+    read_message()

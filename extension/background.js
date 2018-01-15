@@ -18,13 +18,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
+var EXTENSION_VERSION = "2.1.1";
+var REQUIRED_WRAPPER_VERSION = "2.0.7";
 var interruptDownloads = true;
 var ugetWrapperNotFound = true;
 var disposition = '';
 var hostName;
 var ugetChromeWrapperVersion;
-var ugetVersion;
+var ugetVersion = '';
 var chromeVersion;
 var firefoxVersion;
 var minFileSizeToInterrupt = 300 * 1024; // 300 kb
@@ -35,15 +36,15 @@ var keywordsToInclude = [];
 var cookies = '';
 var requestList = [{
     cookies: '',
-    postdata: '',
+    postData: '',
     id: ''
 }, {
     cookies: '',
-    postdata: '',
+    postData: '',
     id: ''
 }, {
     cookies: '',
-    postdata: '',
+    postData: '',
     id: ''
 }];
 var currRequest = 0;
@@ -78,7 +79,7 @@ current_browser.commands.onCommand.addListener(function(command) {
 
 chromeVersion = parseInt(chromeVersion);
 sendMessageToHost({
-    version: "2.1.0"
+    version: EXTENSION_VERSION
 });
 
 // Read the storage for excluded keywords
@@ -117,14 +118,14 @@ var message = {
     url: '',
     cookies: '',
     useragent: '',
-    filename: '',
-    filesize: '',
+    fileName: '',
+    fileSize: '',
     referrer: '',
-    postdata: '',
+    postData: '',
     batch: false
 };
 
-// Add to Chrome context menu
+// Create context menu items
 current_browser.contextMenus.create({
     title: 'Download with uGet',
     id: "download_with_uget",
@@ -134,6 +135,13 @@ current_browser.contextMenus.create({
 current_browser.contextMenus.create({
     title: 'Download all links with uGet',
     id: "download_all_links_with_uget",
+    contexts: ['page']
+});
+
+current_browser.contextMenus.create({
+    title: 'Download video with uGet',
+    id: "download_video_with_uget",
+    documentUrlPatterns: ['*://www.youtube.com/watch?v=*'],
     contexts: ['page']
 });
 
@@ -153,6 +161,11 @@ current_browser.contextMenus.onClicked.addListener(function(info, tab) {
                 current_browser.cookies.getAll({ 'url': extractRootURL(info.pageUrl) }, parseCookies);
             }
         });
+    } else if (info.menuItemId === "download_video_with_uget") {
+        // Youtube
+        message.url = info['pageUrl'];
+        message.referrer = info['pageUrl'];
+        current_browser.cookies.getAll({ 'url': extractRootURL(info.pageUrl) }, parseCookies);
     }
 });
 
@@ -189,15 +202,15 @@ current_browser.downloads.onCreated.addListener(function(downloadItem) {
     });
 
     message.url = url;
-    message.filename = unescape(downloadItem['filename']).replace(/\"/g, "");
-    message.filesize = fileSize;
+    message.fileName = unescape(downloadItem['filename']).replace(/\"/g, "");
+    message.fileSize = fileSize;
     message.referrer = downloadItem['referrer'];
     current_browser.cookies.getAll({ 'url': extractRootURL(url) }, parseCookies);
 });
 
 current_browser.webRequest.onBeforeRequest.addListener(function(details) {
     if (details.method === 'POST') {
-        message.postdata = postParams(details.requestBody.formData);
+        message.postData = postParams(details.requestBody.formData);
     }
     return {
         requestHeaders: details.requestHeaders
@@ -270,8 +283,8 @@ current_browser.webRequest.onHeadersReceived.addListener(function(details) {
 
     for (var i = 0; i < details.responseHeaders.length; ++i) {
         if (details.responseHeaders[i].name.toLowerCase() == 'content-length') {
-            message.filesize = details.responseHeaders[i].value;
-            var fileSize = parseInt(message.filesize);
+            message.fileSize = details.responseHeaders[i].value;
+            var fileSize = parseInt(message.fileSize);
             if (fileSize < minFileSizeToInterrupt && !isWhiteListed(message.url)) {
                 return {
                     responseHeaders: details.responseHeaders
@@ -280,8 +293,8 @@ current_browser.webRequest.onHeadersReceived.addListener(function(details) {
         } else if (details.responseHeaders[i].name.toLowerCase() == 'content-disposition') {
             disposition = details.responseHeaders[i].value;
             if (disposition.lastIndexOf('filename') != -1) {
-                message.filename = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)[1];
-                message.filename = unescape(message.filename).replace(/\"/g, "");
+                message.fileName = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)[1];
+                message.fileName = unescape(message.fileName).replace(/\"/g, "");
                 interruptDownload = true;
             }
         } else if (details.responseHeaders[i].name.toLowerCase() == 'content-type') {
@@ -316,7 +329,7 @@ current_browser.webRequest.onHeadersReceived.addListener(function(details) {
             }
         }
         if (details.method != "POST") {
-            message.postdata = '';
+            message.postData = '';
         }
         current_browser.cookies.getAll({ 'url': extractRootURL(message.url) }, parseCookies);
         var scheme = /^https/.test(details.url) ? 'https' : 'http';
@@ -387,7 +400,7 @@ function sendMessageToHost(message) {
 function getState() {
     if (ugetWrapperNotFound || !ugetChromeWrapperVersion) {
         return 2;
-    } else if (!ugetChromeWrapperVersion.startsWith("2.0.6")) {
+    } else if (!ugetChromeWrapperVersion.startsWith(REQUIRED_WRAPPER_VERSION)) {
         return 1;
     } else {
         return 0;
@@ -400,8 +413,8 @@ function getState() {
 function clearMessage() {
     message.url = '';
     message.cookies = '';
-    message.filename = '';
-    message.filesize = '';
+    message.fileName = '';
+    message.fileSize = '';
     message.referrer = '';
     message.useragent = '';
     message.batch = false;
