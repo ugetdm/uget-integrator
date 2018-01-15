@@ -94,7 +94,7 @@
 
 ;--------------------------------
 ;General
-  !define _VERSION "2.0.6.0"
+  !define _VERSION "2.0.7.0"
 
   ;Name and file
   Name "uGet Chrome Wrapper"
