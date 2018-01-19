@@ -17,9 +17,6 @@
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;--------------------------------
-; StrRep function
-
-!define StrRep "!insertmacro StrRep"
 !macro StrRep output string old new
     Push `${string}`
     Push `${old}`
@@ -83,9 +80,9 @@
         Exch $R1
     FunctionEnd
 !macroend
-!insertmacro Func_StrRep ""
-; !insertmacro Func_StrRep "un."
 
+!define StrRep "!insertmacro StrRep"
+!insertmacro Func_StrRep ""
 
 ;--------------------------------
 ;Include Modern UI
@@ -95,16 +92,17 @@
 ;--------------------------------
 ;General
   !define _VERSION "2.0.7.0"
+  !define _PROGRAM_NAME "uget-chrome-wrapper"
 
   ;Name and file
   Name "uGet Chrome Wrapper"
-  OutFile "uget-chrome-wrapper_${_VERSION}.exe"
+  OutFile "${_PROGRAM_NAME}_${_VERSION}.exe"
 
   ;Default installation folder
-  InstallDir $PROGRAMFILES\uget-chrome-wrapper
+  InstallDir $PROGRAMFILES\${_PROGRAM_NAME}
 
   ;Get installation folder from registry if available
-  InstallDirRegKey HKLM "Software\uget-chrome-wrapper" "Install_Dir"
+  InstallDirRegKey HKLM "Software\${_PROGRAM_NAME}" "Install_Dir"
 
   ;Request application privileges for Windows Vista
   RequestExecutionLevel admin
@@ -141,7 +139,7 @@
   
 ;--------------------------------
 ; The stuff to install
-Section "uget-chrome-wrapper (required)"
+Section "${_PROGRAM_NAME} (required)"
 
 	SectionIn RO
 
@@ -149,31 +147,31 @@ Section "uget-chrome-wrapper (required)"
 	SetOutPath $INSTDIR
 
 	; Put the script
-	File "..\..\uget-chrome-wrapper\bin\uget-chrome-wrapper"
+	File "..\..\${_PROGRAM_NAME}\bin\${_PROGRAM_NAME}"
 
-	Rename $INSTDIR\uget-chrome-wrapper $INSTDIR\uget-chrome-wrapper.py
+	Rename $INSTDIR\${_PROGRAM_NAME} $INSTDIR\${_PROGRAM_NAME}.py
 
 	; Replace \ by \\ in the installation path
 	${StrRep} $0 "$INSTDIR" "\" "\\"
 	
-	; Put the uget-chrome-wrapper.bat file
-	File "..\..\uget-chrome-wrapper\windows\uget-chrome-wrapper.bat"
+	; Put the ${_PROGRAM_NAME}.bat file
+	File "..\..\${_PROGRAM_NAME}\windows\${_PROGRAM_NAME}.bat"
 
 	; Update the com.javahelps.ugetchromewrapper.json file
 	FileOpen $9 $INSTDIR\com.javahelps.ugetchromewrapper.json w ;Opens a Empty File an fills it
-	FileWrite $9 '{"name":"com.javahelps.ugetchromewrapper","description":"Integrate uGet with Google Chrome","path":"$0\\uget-chrome-wrapper.bat","type":"stdio","allowed_origins":["chrome-extension://efjgjleilhflffpbnkaofpmdnajdpepi/","chrome-extension://akcbnhoidebjpiefdkmaaicfgdpbnoac/"]}$\r$\n'
+	FileWrite $9 '{"name":"com.javahelps.ugetchromewrapper","description":"Integrate uGet with Google Chrome","path":"$0\\${_PROGRAM_NAME}.bat","type":"stdio","allowed_origins":["chrome-extension://efjgjleilhflffpbnkaofpmdnajdpepi/","chrome-extension://akcbnhoidebjpiefdkmaaicfgdpbnoac/"]}$\r$\n'
 	FileClose $9 ;Closes the filled file
 
     ; Update the com.javahelps.ugetfirefoxwrapper.json file
 	FileOpen $9 $INSTDIR\com.javahelps.ugetfirefoxwrapper.json w ;Opens a Empty File an fills it
-	FileWrite $9 '{"name":"com.javahelps.ugetfirefoxwrapper","description":"Integrate uGet with Mozilla Firefox","path":"$0\\uget-chrome-wrapper.bat","type":"stdio","allowed_extensions":["uget-integration@slgobinath"]}$\r$\n'
+	FileWrite $9 '{"name":"com.javahelps.ugetfirefoxwrapper","description":"Integrate uGet with Mozilla Firefox","path":"$0\\${_PROGRAM_NAME}.bat","type":"stdio","allowed_extensions":["uget-integration@slgobinath"]}$\r$\n'
 	FileClose $9 ;Closes the filled file
 	
 	; Put the icon
 	File "uget-icon.ico"
 
 	; Write the installation path into the registry
-	WriteRegStr HKLM SOFTWARE\uget-chrome-wrapper "Install_Dir" "$INSTDIR"
+	WriteRegStr HKLM SOFTWARE\${_PROGRAM_NAME} "Install_Dir" "$INSTDIR"
 	WriteRegStr HKCU "SOFTWARE\Google\Chrome\NativeMessagingHosts\com.javahelps.ugetchromewrapper" "" "$INSTDIR\com.javahelps.ugetchromewrapper.json"
 	WriteRegStr HKLM "SOFTWARE\Google\Chrome\NativeMessagingHosts\com.javahelps.ugetchromewrapper" "" "$INSTDIR\com.javahelps.ugetchromewrapper.json"
 	WriteRegStr HKCU "SOFTWARE\Mozilla\NativeMessagingHosts\com.javahelps.ugetfirefoxwrapper" "" "$INSTDIR\com.javahelps.ugetfirefoxwrapper.json"
@@ -181,16 +179,16 @@ Section "uget-chrome-wrapper (required)"
 
 
 	; Write the uninstall keys for Windows
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\uget-chrome-wrapper" "DisplayName" "uGet Chrome Wrapper"
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\uget-chrome-wrapper" "Publisher" "Gobinath"
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\uget-chrome-wrapper" "HelpLink" "https://github.com/slgobinath/uget-chrome-wrapper/issues"
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\uget-chrome-wrapper" "URLUpdateInfo" "https://github.com/slgobinath/uget-chrome-wrapper/releases"
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\uget-chrome-wrapper" "URLInfoAbout" "https://slgobinath.github.io/uget-chrome-wrapper/"
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\uget-chrome-wrapper" "DisplayVersion" "${_VERSION}"
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\uget-chrome-wrapper" "UninstallString" '"$INSTDIR\uninstall.exe"'
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\uget-chrome-wrapper" "DisplayIcon" "$INSTDIR\uget-icon.ico,0"
-	WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\uget-chrome-wrapper" "NoModify" 1
-	WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\uget-chrome-wrapper" "NoRepair" 1
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${_PROGRAM_NAME}" "DisplayName" "uGet Chrome Wrapper"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${_PROGRAM_NAME}" "Publisher" "Gobinath"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${_PROGRAM_NAME}" "HelpLink" "https://github.com/slgobinath/${_PROGRAM_NAME}/issues"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${_PROGRAM_NAME}" "URLUpdateInfo" "https://github.com/slgobinath/${_PROGRAM_NAME}/releases"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${_PROGRAM_NAME}" "URLInfoAbout" "https://slgobinath.github.io/${_PROGRAM_NAME}/"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${_PROGRAM_NAME}" "DisplayVersion" "${_VERSION}"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${_PROGRAM_NAME}" "UninstallString" '"$INSTDIR\uninstall.exe"'
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${_PROGRAM_NAME}" "DisplayIcon" "$INSTDIR\uget-icon.ico,0"
+	WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${_PROGRAM_NAME}" "NoModify" 1
+	WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${_PROGRAM_NAME}" "NoRepair" 1
 	WriteUninstaller "uninstall.exe"
 
 SectionEnd
@@ -206,12 +204,12 @@ Section "Uninstall"
 	DeleteRegKey HKLM "SOFTWARE\Google\Chrome\NativeMessagingHosts\com.javahelps.ugetchromewrapper"
 	DeleteRegKey HKCU "SOFTWARE\Mozilla\NativeMessagingHosts\com.javahelps.ugetfirefoxwrapper"
 	DeleteRegKey HKLM "SOFTWARE\Mozilla\NativeMessagingHosts\com.javahelps.ugetfirefoxwrapper"
-	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\uget-chrome-wrapper"
-	DeleteRegKey HKLM SOFTWARE\uget-chrome-wrapper
+	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${_PROGRAM_NAME}"
+	DeleteRegKey HKLM SOFTWARE\${_PROGRAM_NAME}
 
 	; Remove files and uninstaller
-	Delete $INSTDIR\uget-chrome-wrapper.py
-	Delete $INSTDIR\uget-chrome-wrapper.bat
+	Delete $INSTDIR\${_PROGRAM_NAME}.py
+	Delete $INSTDIR\${_PROGRAM_NAME}.bat
 	Delete $INSTDIR\com.javahelps.ugetchromewrapper.json
 	Delete $INSTDIR\com.javahelps.ugetfirefoxwrapper.json
 	Delete $INSTDIR\uget-icon.ico
@@ -221,3 +219,26 @@ Section "Uninstall"
 	RMDir "$INSTDIR"
 
 SectionEnd
+
+;--------------------------------
+; uninstall the previous version
+Function .onInit
+ 
+  ReadRegStr $R0 HKLM \
+  "Software\Microsoft\Windows\CurrentVersion\Uninstall\${_PROGRAM_NAME}" \
+  "UninstallString"
+  StrCmp $R0 "" done
+ 
+  MessageBox MB_OKCANCEL|MB_ICONEXCLAMATION \
+  "${_PROGRAM_NAME} is already installed. $\n$\nClick `OK` to remove the \
+  previous version or `Cancel` to cancel this upgrade." \
+  IDOK uninst
+  Abort
+ 
+;Run the uninstaller
+uninst:
+  ClearErrors
+  Exec $R0
+done:
+ 
+FunctionEnd
