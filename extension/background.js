@@ -33,7 +33,18 @@ var current_browser;
 var filter = [];
 var keywordsToExclude = [];
 var keywordsToInclude = [];
+mediasInTab = {};
 var cookies = '';
+var message = {
+    url: '',
+    cookies: '',
+    useragent: '',
+    fileName: '',
+    fileSize: '',
+    referrer: '',
+    postData: '',
+    batch: false
+};
 var requestList = [{
     cookies: '',
     postData: '',
@@ -48,338 +59,416 @@ var requestList = [{
     id: ''
 }];
 var currRequest = 0;
-try {
-    chromeVersion = /Chrome\/([0-9]+)/.exec(navigator.userAgent)[1];
-} catch (ex) {
-    chromeVersion = 33;
+
+function start() {
+    initialize();
+    readStorage();
+    setDownloadHooks();
+    enableVideoGrabber();
 }
-try {
-    current_browser = browser;
-    hostName = 'com.javahelps.ugetfirefoxwrapper';
-    current_browser.runtime.getBrowserInfo().then(
-        function(info) {
-            if (info.name === 'Firefox') {
-                // Convert version string to int
-                firefoxVersion = parseInt(info.version.replace(/[ab]\d+/, '').split('.')[0]);
+/**
+ * Initialize the variables.
+ */
+function initialize() {
+    // Get the running browser
+    try {
+        chromeVersion = /Chrome\/([0-9]+)/.exec(navigator.userAgent)[1];
+    } catch (ex) {
+        chromeVersion = 33;
+    }
+    try {
+        current_browser = browser;
+        hostName = 'com.javahelps.ugetfirefoxwrapper';
+        current_browser.runtime.getBrowserInfo().then(
+            function(info) {
+                if (info.name === 'Firefox') {
+                    // Convert version string to int
+                    firefoxVersion = parseInt(info.version.replace(/[ab]\d+/, '').split('.')[0]);
+                }
             }
+        );
+    } catch (ex) {
+        firefoxVersion = 0;
+        current_browser = chrome;
+        hostName = 'com.javahelps.ugetchromewrapper';
+    }
+    // Set keyboard shortcut listener
+    current_browser.commands.onCommand.addListener(function(command) {
+        if ("toggle-interruption" === command) {
+            // Toggle
+            setInterruptDownload(!interruptDownloads, true);
         }
-    );
-} catch (ex) {
-    firefoxVersion = 0;
-    current_browser = chrome;
-    hostName = 'com.javahelps.ugetchromewrapper';
+    });
+    chromeVersion = parseInt(chromeVersion);
+    sendMessageToHost({
+        version: EXTENSION_VERSION
+    });
+    createContextMenus();
 }
 
-current_browser.commands.onCommand.addListener(function(command) {
-    if ("toggle-interruption" === command) {
-        // Toggle
-        setInterruptDownload(!interruptDownloads, true);
-    }
-});
+/**
+ * Read storage for extension specific preferences.
+ * If no preferences found, initialize with default values.
+ */
+function readStorage() {
+    current_browser.storage.sync.get(function(items) {
+        // Read the storage for excluded keywords
+        if (items["uget-keywords-exclude"]) {
+            keywordsToExclude = items["uget-keywords-exclude"].split(/[\s,]+/);
+        } else {
+            current_browser.storage.sync.set({ "uget-keywords-exclude": '' });
+        }
 
-chromeVersion = parseInt(chromeVersion);
-sendMessageToHost({
-    version: EXTENSION_VERSION
-});
+        // Read the storage for included keywords
+        if (items["uget-keywords-include"]) {
+            keywordsToInclude = items["uget-keywords-include"].split(/[\s,]+/);
+        } else {
+            current_browser.storage.sync.set({ "uget-keywords-include": '' });
+        }
 
-// Read the storage for excluded keywords
-current_browser.storage.sync.get(function(items) {
-    if (items["uget-keywords-exclude"]) {
-        keywordsToExclude = items["uget-keywords-exclude"].split(/[\s,]+/);
-    } else {
-        current_browser.storage.sync.set({ "uget-keywords-exclude": '' });
-    }
+        // Read the storage for the minimum file-size to interrupt
+        if (items["uget-min-file-size"]) {
+            minFileSizeToInterrupt = parseInt(items["uget-min-file-size"]);
+        } else {
+            current_browser.storage.sync.set({ "uget-min-file-size": minFileSizeToInterrupt });
+        }
 
-    // Read the local storage for included keywords
-    if (items["uget-keywords-include"]) {
-        keywordsToInclude = items["uget-keywords-include"].split(/[\s,]+/);
-    } else {
-        current_browser.storage.sync.set({ "uget-keywords-include": '' });
-    }
+        // Read the storage for enabled flag
+        if (!items["uget-interrupt"]) {
+            // Keep the value string
+            current_browser.storage.sync.set({ "uget-interrupt": 'true' });
+        } else {
+            var interrupt = (items["uget-interrupt"] == "true");
+            setInterruptDownload(interrupt);
+        }
+    });
+}
 
-    // Read the local storage for the minimum file-size to interrupt
-    if (items["uget-min-file-size"]) {
-        minFileSizeToInterrupt = parseInt(items["uget-min-file-size"]);
-    } else {
-        current_browser.storage.sync.set({ "uget-min-file-size": minFileSizeToInterrupt });
-    }
-
-    // Read the local storage for enabled flag
-    if (!items["uget-interrupt"]) {
-        // Keep the value string
-        current_browser.storage.sync.set({ "uget-interrupt": 'true' });
-    } else {
-        var interrupt = (items["uget-interrupt"] == "true");
-        setInterruptDownload(interrupt);
-    }
-});
-// Message format to send the download information to the uget-chrome-wrapper
-var message = {
-    url: '',
-    cookies: '',
-    useragent: '',
-    fileName: '',
-    fileSize: '',
-    referrer: '',
-    postData: '',
-    batch: false
-};
-
-// Create context menu items
-current_browser.contextMenus.create({
-    title: 'Download with uGet',
-    id: "download_with_uget",
-    contexts: ['link']
-});
-
-current_browser.contextMenus.create({
-    title: 'Download all links with uGet',
-    id: "download_all_links_with_uget",
-    contexts: ['page']
-});
-
-current_browser.contextMenus.create({
-    title: 'Download video with uGet',
-    id: "download_video_with_uget",
-    documentUrlPatterns: ['*://www.youtube.com/watch?v=*'],
-    contexts: ['page']
-});
-
-current_browser.contextMenus.onClicked.addListener(function(info, tab) {
-    "use strict";
-    if (info.menuItemId === "download_with_uget") {
-        message.url = info['linkUrl'];
-        message.referrer = info['pageUrl'];
-        current_browser.cookies.getAll({ 'url': extractRootURL(info.pageUrl) }, parseCookies);
-    } else if (info.menuItemId === "download_all_links_with_uget") {
-        current_browser.tabs.executeScript(null, { file: 'extract.js' }, function(results) {
-            // Do nothing
-            if (results[0].success) {
-                message.url = results[0].urls;
-                message.referrer = info['pageUrl'];
-                message.batch = true;
-                current_browser.cookies.getAll({ 'url': extractRootURL(info.pageUrl) }, parseCookies);
-            }
-        });
-    } else if (info.menuItemId === "download_video_with_uget") {
-        // Youtube
-        message.url = info['pageUrl'];
-        message.referrer = info['pageUrl'];
-        current_browser.cookies.getAll({ 'url': extractRootURL(info.pageUrl) }, parseCookies);
-    }
-});
-
-// Interrupt downloads on creation
-current_browser.downloads.onCreated.addListener(function(downloadItem) {
-
-    if (ugetWrapperNotFound || !interruptDownloads) { // uget-chrome-wrapper not installed
-        return;
-    }
-
-    if ("in_progress" !== downloadItem['state'].toString().toLowerCase()) {
-        return;
-    }
-
-    var fileSize = downloadItem['fileSize'];
-
-    var url = '';
-    if (chromeVersion >= 54) {
-        url = downloadItem['finalUrl'];
-    } else {
-        url = downloadItem['url'];
-    }
-    if (fileSize < minFileSizeToInterrupt && !isWhiteListed(url)) {
-        return;
-    }
-    if (isBlackListed(url)) {
-        return;
-    }
-    // Cancel the download
-    current_browser.downloads.cancel(downloadItem.id);
-    // Erase the download from list
-    current_browser.downloads.erase({
-        id: downloadItem.id
+/**
+ * Create required context menus and set listeners.
+ */
+function createContextMenus() {
+    current_browser.contextMenus.create({
+        title: 'Download with uGet',
+        id: "download_with_uget",
+        contexts: ['link']
     });
 
-    message.url = url;
-    message.fileName = unescape(downloadItem['filename']).replace(/\"/g, "");
-    message.fileSize = fileSize;
-    message.referrer = downloadItem['referrer'];
-    current_browser.cookies.getAll({ 'url': extractRootURL(url) }, parseCookies);
-});
+    current_browser.contextMenus.create({
+        title: 'Download all links with uGet',
+        id: "download_all_links_with_uget",
+        contexts: ['page']
+    });
 
-current_browser.webRequest.onBeforeRequest.addListener(function(details) {
-    if (details.method === 'POST') {
-        message.postData = postParams(details.requestBody.formData);
-    }
-    return {
-        requestHeaders: details.requestHeaders
-    };
-}, {
-    urls: [
-        '<all_urls>'
-    ],
-    types: [
-        'main_frame',
-        'sub_frame'
-    ]
-}, [
-    'blocking',
-    'requestBody'
-]);
-current_browser.webRequest.onBeforeSendHeaders.addListener(function(details) {
-    currRequest++;
-    if (currRequest > 2)
-        currRequest = 2;
-    requestList[currRequest].id = details.requestId;
-    for (var i = 0; i < details.requestHeaders.length; ++i) {
-        if (details.requestHeaders[i].name.toLowerCase() === 'user-agent') {
-            message.useragent = details.requestHeaders[i].value;
-        } else if (details.requestHeaders[i].name.toLowerCase() === 'referer') {
-            requestList[currRequest].referrer = details.requestHeaders[i].value;
-        } else if (details.requestHeaders[i].name.toLowerCase() === 'cookie') {
-            requestList[currRequest].cookies = details.requestHeaders[i].value;
-        }
-    }
-    return {
-        requestHeaders: details.requestHeaders
-    };
-}, {
-    urls: [
-        '<all_urls>'
-    ],
-    types: [
-        'main_frame',
-        'sub_frame',
-        'xmlhttprequest'
-    ]
-}, [
-    'blocking',
-    'requestHeaders'
-]);
-current_browser.webRequest.onHeadersReceived.addListener(function(details) {
+    current_browser.contextMenus.create({
+        title: 'Download media with uGet',
+        id: "download_media_with_uget",
+        enabled: false,
+        contexts: ['page']
+    });
 
-    if (ugetWrapperNotFound) { // uget-chrome-wrapper not installed
-        return {
-            responseHeaders: details.responseHeaders
-        };
-    }
-
-    if (!details.statusLine.includes("200")) { // HTTP response is not OK
-        return {
-            responseHeaders: details.responseHeaders
-        };
-    }
-
-    if (isBlackListed(details.url)) {
-        return {
-            responseHeaders: details.responseHeaders
-        };
-    }
-
-    var interruptDownload = false;
-    message.url = details.url;
-    var contentType = "";
-
-    for (var i = 0; i < details.responseHeaders.length; ++i) {
-        if (details.responseHeaders[i].name.toLowerCase() == 'content-length') {
-            message.fileSize = details.responseHeaders[i].value;
-            var fileSize = parseInt(message.fileSize);
-            if (fileSize < minFileSizeToInterrupt && !isWhiteListed(message.url)) {
-                return {
-                    responseHeaders: details.responseHeaders
-                };
-            }
-        } else if (details.responseHeaders[i].name.toLowerCase() == 'content-disposition') {
-            disposition = details.responseHeaders[i].value;
-            if (disposition.lastIndexOf('filename') != -1) {
-                message.fileName = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)[1];
-                message.fileName = unescape(message.fileName).replace(/\"/g, "");
-                interruptDownload = true;
-            }
-        } else if (details.responseHeaders[i].name.toLowerCase() == 'content-type') {
-            contentType = details.responseHeaders[i].value;
-            if (/\b(?:xml|rss|javascript|json|html|text)\b/.test(contentType)) {
-                interruptDownload = false;
-                return {
-                    responseHeaders: details.responseHeaders
-                };
-            } else if (/\b(?:application\/|video\/|audio\/)\b/.test(contentType) == true) {
-                interruptDownload = true;
-            } else {
-                return {
-                    responseHeaders: details.responseHeaders
-                };
-            }
-        }
-    }
-    if (interruptDownload && interruptDownloads) {
-        for (var i = 0; i < filter.length; i++) {
-            if (filter[i] != "" && contentType.lastIndexOf(filter[i]) != -1) {
-                return {
-                    responseHeaders: details.responseHeaders
-                };
-            }
-        }
-        for (var j = 0; j < 3; j++) {
-            if (details.requestId == requestList[j].id && requestList[j].id != "") {
-                message.referrer = requestList[j].referrer;
-                message.cookies = requestList[j].cookies;
-                break;
-            }
-        }
-        if (details.method != "POST") {
-            message.postData = '';
-        }
-        current_browser.cookies.getAll({ 'url': extractRootURL(message.url) }, parseCookies);
-        var scheme = /^https/.test(details.url) ? 'https' : 'http';
-        if (chromeVersion >= 35 || firefoxVersion >= 51) {
-            return {
-                redirectUrl: "javascript:"
-            };
-        } else if (details.frameId === 0) {
-            current_browser.tabs.update(details.tabId, {
-                url: "javascript:"
+    current_browser.contextMenus.onClicked.addListener(function(info, tab) {
+        "use strict";
+        var page_url = info.pageUrl;
+        if (info.menuItemId === "download_with_uget") {
+            message.url = info['linkUrl'];
+            message.referrer = page_url;
+            current_browser.cookies.getAll({ 'url': extractRootURL(page_url) }, parseCookies);
+        } else if (info.menuItemId === "download_all_links_with_uget") {
+            current_browser.tabs.executeScript(null, { file: 'extract.js' }, function(results) {
+                // Do nothing
+                if (results[0].success) {
+                    message.url = results[0].urls;
+                    message.referrer = page_url;
+                    message.batch = true;
+                    current_browser.cookies.getAll({ 'url': extractRootURL(page_url) }, parseCookies);
+                }
             });
-            var responseHeaders = details.responseHeaders.filter(function(header) {
-                var name = header.name.toLowerCase();
-                return name !== 'content-type' &&
-                    name !== 'x-content-type-options' &&
-                    name !== 'content-disposition';
-            }).concat([{
-                name: 'Content-Type',
-                value: 'text/plain'
-            }, {
-                name: 'X-Content-Type-Options',
-                value: 'nosniff'
-            }]);
-            return {
-                responseHeaders: responseHeaders
-            };
+        } else if (info.menuItemId === "download_media_with_uget") {
+            if (page_url.includes('/www.youtube.com/watch?v=')) {
+                // Youtube
+                message.url = page_url;
+                message.referrer = page_url;
+                current_browser.cookies.getAll({ 'url': extractRootURL(page_url) }, parseCookies);
+            } else {
+                // Other videos
+                var media_set = mediasInTab[tab['id']];
+                if (media_set) {
+                    var urls = Array.from(media_set);
+                    var no_or_urls = urls.length;
+                    if (no_or_urls == 1) {
+                        message.url = urls[0];
+                        message.referrer = page_url;
+                        current_browser.cookies.getAll({ 'url': extractRootURL(page_url) }, parseCookies);
+                    } else if (no_or_urls > 1) {
+                        message.url = urls;
+                        message.referrer = page_url;
+                        message.batch = true;
+                        current_browser.cookies.getAll({ 'url': extractRootURL(page_url) }, parseCookies);
+                    }
+                }
+            }
+
+        }
+    });
+}
+
+/**
+ * Set hooks to interrupt downloads.
+ */
+function setDownloadHooks() {
+    // Interrupt downloads on creation
+    current_browser.downloads.onCreated.addListener(function(downloadItem) {
+
+        if (ugetWrapperNotFound || !interruptDownloads) { // uget-chrome-wrapper not installed
+            return;
+        }
+
+        if ("in_progress" !== downloadItem['state'].toString().toLowerCase()) {
+            return;
+        }
+
+        var fileSize = downloadItem['fileSize'];
+
+        var url = '';
+        if (chromeVersion >= 54) {
+            url = downloadItem['finalUrl'];
+        } else {
+            url = downloadItem['url'];
+        }
+        if (fileSize < minFileSizeToInterrupt && !isWhiteListed(url)) {
+            return;
+        }
+        if (isBlackListed(url)) {
+            return;
+        }
+        // Cancel the download
+        current_browser.downloads.cancel(downloadItem.id);
+        // Erase the download from list
+        current_browser.downloads.erase({
+            id: downloadItem.id
+        });
+
+        message.url = url;
+        message.fileName = unescape(downloadItem['filename']).replace(/\"/g, "");
+        message.fileSize = fileSize;
+        message.referrer = downloadItem['referrer'];
+        current_browser.cookies.getAll({ 'url': extractRootURL(url) }, parseCookies);
+    });
+
+    current_browser.webRequest.onBeforeRequest.addListener(function(details) {
+        if (details.method === 'POST') {
+            message.postData = postParams(details.requestBody.formData);
         }
         return {
-            cancel: true
+            requestHeaders: details.requestHeaders
         };
-    } else {
-        clearMessage();
-    }
-    return {
-        responseHeaders: details.responseHeaders
-    };
-}, {
-    urls: [
-        '<all_urls>'
-    ],
-    types: [
-        'main_frame',
-        'sub_frame'
-    ]
-}, [
-    'responseHeaders',
-    'blocking'
-]);
+    }, {
+        urls: [
+            '<all_urls>'
+        ],
+        types: [
+            'main_frame',
+            'sub_frame'
+        ]
+    }, [
+        'blocking',
+        'requestBody'
+    ]);
+    current_browser.webRequest.onBeforeSendHeaders.addListener(function(details) {
+        currRequest++;
+        if (currRequest > 2)
+            currRequest = 2;
+        requestList[currRequest].id = details.requestId;
+        for (var i = 0; i < details.requestHeaders.length; ++i) {
+            if (details.requestHeaders[i].name.toLowerCase() === 'user-agent') {
+                message.useragent = details.requestHeaders[i].value;
+            } else if (details.requestHeaders[i].name.toLowerCase() === 'referer') {
+                requestList[currRequest].referrer = details.requestHeaders[i].value;
+            } else if (details.requestHeaders[i].name.toLowerCase() === 'cookie') {
+                requestList[currRequest].cookies = details.requestHeaders[i].value;
+            }
+        }
+        return {
+            requestHeaders: details.requestHeaders
+        };
+    }, {
+        urls: [
+            '<all_urls>'
+        ],
+        types: [
+            'main_frame',
+            'sub_frame',
+            'xmlhttprequest'
+        ]
+    }, [
+        'blocking',
+        'requestHeaders'
+    ]);
+    current_browser.webRequest.onHeadersReceived.addListener(function(details) {
+
+        if (ugetWrapperNotFound) { // uget-chrome-wrapper not installed
+            return {
+                responseHeaders: details.responseHeaders
+            };
+        }
+
+        if (!details.statusLine.includes("200")) { // HTTP response is not OK
+            return {
+                responseHeaders: details.responseHeaders
+            };
+        }
+
+        if (isBlackListed(details.url)) {
+            return {
+                responseHeaders: details.responseHeaders
+            };
+        }
+
+        var interruptDownload = false;
+        message.url = details.url;
+        var contentType = "";
+
+        for (var i = 0; i < details.responseHeaders.length; ++i) {
+            if (details.responseHeaders[i].name.toLowerCase() == 'content-length') {
+                message.fileSize = details.responseHeaders[i].value;
+                var fileSize = parseInt(message.fileSize);
+                if (fileSize < minFileSizeToInterrupt && !isWhiteListed(message.url)) {
+                    return {
+                        responseHeaders: details.responseHeaders
+                    };
+                }
+            } else if (details.responseHeaders[i].name.toLowerCase() == 'content-disposition') {
+                disposition = details.responseHeaders[i].value;
+                if (disposition.lastIndexOf('filename') != -1) {
+                    message.fileName = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)[1];
+                    message.fileName = unescape(message.fileName).replace(/\"/g, "");
+                    interruptDownload = true;
+                }
+            } else if (details.responseHeaders[i].name.toLowerCase() == 'content-type') {
+                contentType = details.responseHeaders[i].value;
+                if (/\b(?:xml|rss|javascript|json|html|text)\b/.test(contentType)) {
+                    interruptDownload = false;
+                    return {
+                        responseHeaders: details.responseHeaders
+                    };
+                } else if (/\b(?:application\/|video\/|audio\/)\b/.test(contentType) == true) {
+                    interruptDownload = true;
+                } else {
+                    return {
+                        responseHeaders: details.responseHeaders
+                    };
+                }
+            }
+        }
+        if (interruptDownload && interruptDownloads) {
+            for (var i = 0; i < filter.length; i++) {
+                if (filter[i] != "" && contentType.lastIndexOf(filter[i]) != -1) {
+                    return {
+                        responseHeaders: details.responseHeaders
+                    };
+                }
+            }
+            for (var j = 0; j < 3; j++) {
+                if (details.requestId == requestList[j].id && requestList[j].id != "") {
+                    message.referrer = requestList[j].referrer;
+                    message.cookies = requestList[j].cookies;
+                    break;
+                }
+            }
+            if (details.method != "POST") {
+                message.postData = '';
+            }
+            current_browser.cookies.getAll({ 'url': extractRootURL(message.url) }, parseCookies);
+            var scheme = /^https/.test(details.url) ? 'https' : 'http';
+            if (chromeVersion >= 35 || firefoxVersion >= 51) {
+                return {
+                    redirectUrl: "javascript:"
+                };
+            } else if (details.frameId === 0) {
+                current_browser.tabs.update(details.tabId, {
+                    url: "javascript:"
+                });
+                var responseHeaders = details.responseHeaders.filter(function(header) {
+                    var name = header.name.toLowerCase();
+                    return name !== 'content-type' &&
+                        name !== 'x-content-type-options' &&
+                        name !== 'content-disposition';
+                }).concat([{
+                    name: 'Content-Type',
+                    value: 'text/plain'
+                }, {
+                    name: 'X-Content-Type-Options',
+                    value: 'nosniff'
+                }]);
+                return {
+                    responseHeaders: responseHeaders
+                };
+            }
+            return {
+                cancel: true
+            };
+        } else {
+            clearMessage();
+        }
+        return {
+            responseHeaders: details.responseHeaders
+        };
+    }, {
+        urls: [
+            '<all_urls>'
+        ],
+        types: [
+            'main_frame',
+            'sub_frame'
+        ]
+    }, [
+        'responseHeaders',
+        'blocking'
+    ]);
+}
 
 
+/**
+ * Grab videos and add them to mediasInTab.
+ */
+function enableVideoGrabber() {
+    current_browser.tabs.onActivated.addListener(function(activeInfo) {
+        current_browser.contextMenus.update("download_media_with_uget", { enabled: mediasInTab[activeInfo['tabId']] != undefined });
+    });
+
+    current_browser.tabs.onRemoved.addListener(function(tabId, removeInfo) {
+        if (mediasInTab[tabId]) {
+            delete mediasInTab[tabId];
+        }
+    });
+
+    current_browser.webRequest.onResponseStarted.addListener(function(details) {
+        content_url = details['url'];
+        type = details['type'];
+        if (type === 'media' || content_url.includes('mp4') || content_url.includes('www.youtube.com/watch?v=')) {
+            tabId = details['tabId'];
+            mediaSet = mediasInTab[tabId];
+            if (mediaSet == undefined) {
+                mediaSet = new Set();
+                mediasInTab[tabId] = mediaSet;
+            }
+            mediaSet.add(content_url);
+            current_browser.contextMenus.update("download_media_with_uget", { enabled: true });
+        }
+    }, {
+        urls: [
+            '<all_urls>'
+        ],
+        types: [
+            'main_frame',
+            'media',
+            'object'
+        ]
+    });
+}
+
+////////////////// Utility Functions //////////////////
 /**
  * Send message to the uget-chrome-wrapper
  */
@@ -534,3 +623,5 @@ function setInterruptDownload(interrupt, writeToStorage) {
         current_browser.storage.sync.set({ "uget-interrupt": interrupt.toString() });
     }
 }
+
+start();
