@@ -201,7 +201,7 @@ function createContextMenus() {
                         message.referrer = page_url;
                         current_browser.cookies.getAll({ 'url': extractRootURL(page_url) }, parseCookies);
                     } else if (no_or_urls > 1) {
-                        message.url = urls;
+                        message.url = urls.join('\n');
                         message.referrer = page_url;
                         message.batch = true;
                         current_browser.cookies.getAll({ 'url': extractRootURL(page_url) }, parseCookies);
@@ -439,6 +439,13 @@ function enableVideoGrabber() {
 
     current_browser.tabs.onRemoved.addListener(function(tabId, removeInfo) {
         if (mediasInTab[tabId]) {
+            delete mediasInTab[tabId];
+        }
+    });
+
+    current_browser.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+        if (changeInfo['status'] === 'loading') {
+            // Loading a new page
             delete mediasInTab[tabId];
         }
     });
