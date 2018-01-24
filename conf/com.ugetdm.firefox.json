@@ -1,5 +1,5 @@
 {
-    "name": "com.javahelps.ugetfirefoxwrapper",
+    "name": "com.ugetdm.firefox",
     "description": "Integrate uGet with Mozilla Firefox",
     "path": "/usr/bin/uget-integrator",
     "type": "stdio",

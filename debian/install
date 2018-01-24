@@ -1,5 +1,5 @@
 bin/uget-integrator /usr/bin
-conf/com.javahelps.ugetchromewrapper.json /etc/opt/chrome/native-messaging-hosts
-conf/com.javahelps.ugetchromewrapper.json /etc/chromium/native-messaging-hosts
-conf/com.javahelps.ugetfirefoxwrapper.json /usr/lib/mozilla/native-messaging-hosts
-conf/com.javahelps.ugetfirefoxwrapper.json /usr/lib64/mozilla/native-messaging-hosts
+conf/com.ugetdm.chrome.json /etc/opt/chrome/native-messaging-hosts
+conf/com.ugetdm.chrome.json /etc/chromium/native-messaging-hosts
+conf/com.ugetdm.firefox.json /usr/lib/mozilla/native-messaging-hosts
+conf/com.ugetdm.firefox.json /usr/lib64/mozilla/native-messaging-hosts

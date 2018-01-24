@@ -1,5 +1,5 @@
 {
-    "name": "com.javahelps.ugetchromewrapper",
+    "name": "com.ugetdm.chrome",
     "description": "Integrate uGet with Google Chrome, Chromium, Vivaldi and Opera",
     "path": "/usr/bin/uget-integrator",
     "type": "stdio",
