@@ -1,4 +1,4 @@
-uget-chrome-wrapper (2.0.7-1) xenial; urgency=medium
+uget-integrator (2.0.7-1) xenial; urgency=medium
 
   * Support Youtube downloader
   

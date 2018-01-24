@@ -1,4 +1,4 @@
-; uget-chrome-wrapper is a tool to integrate uGet Download manager
+; uget-integrator is a tool to integrate uGet Download manager
 ; with Google Chrome, Chromium, Vivaldi and Opera in Linux and Windows.
 
 ; Copyright (C) 2016  Gobinath
@@ -92,7 +92,7 @@
 ;--------------------------------
 ;General
   !define _VERSION "2.0.7.0"
-  !define _PROGRAM_NAME "uget-chrome-wrapper"
+  !define _PROGRAM_NAME "uget-integrator"
 
   ;Name and file
   Name "uGet Chrome Wrapper"

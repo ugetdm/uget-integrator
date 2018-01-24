@@ -1,0 +1,10 @@
+{
+    "name": "com.javahelps.ugetchromewrapper",
+    "description": "Integrate uGet with Google Chrome, Chromium, Vivaldi and Opera",
+    "path": "/usr/bin/uget-integrator",
+    "type": "stdio",
+    "allowed_origins": [
+        "chrome-extension://efjgjleilhflffpbnkaofpmdnajdpepi/",
+        "chrome-extension://akcbnhoidebjpiefdkmaaicfgdpbnoac/"
+    ]
+}
