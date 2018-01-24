@@ -36,14 +36,15 @@ var keywordsToInclude = [];
 mediasInTab = {};
 var cookies = '';
 var message = {
-    url: '',
-    cookies: '',
-    useragent: '',
-    fileName: '',
-    fileSize: '',
-    referrer: '',
-    postData: '',
-    batch: false
+    URL: '',
+    Cookies: '',
+    UserAgent: '',
+    FileName: '',
+    FileSize: '',
+    Referer: '',
+    PostData: '',
+    Batch: false,
+    Version: EXTENSION_VERSION
 };
 var requestList = [{
     cookies: '',
@@ -100,9 +101,7 @@ function initialize() {
         }
     });
     chromeVersion = parseInt(chromeVersion);
-    sendMessageToHost({
-        version: EXTENSION_VERSION
-    });
+    sendMessageToHost(message);
     createContextMenus();
 }
 
@@ -171,24 +170,24 @@ function createContextMenus() {
         "use strict";
         var page_url = info.pageUrl;
         if (info.menuItemId === "download_with_uget") {
-            message.url = info['linkUrl'];
-            message.referrer = page_url;
+            message.URL = info['linkUrl'];
+            message.Referer = page_url;
             current_browser.cookies.getAll({ 'url': extractRootURL(page_url) }, parseCookies);
         } else if (info.menuItemId === "download_all_links_with_uget") {
             current_browser.tabs.executeScript(null, { file: 'extract.js' }, function(results) {
                 // Do nothing
                 if (results[0].success) {
-                    message.url = results[0].urls;
-                    message.referrer = page_url;
-                    message.batch = true;
+                    message.URL = results[0].urls;
+                    message.Referer = page_url;
+                    message.Batch = true;
                     current_browser.cookies.getAll({ 'url': extractRootURL(page_url) }, parseCookies);
                 }
             });
         } else if (info.menuItemId === "download_media_with_uget") {
             if (page_url.includes('/www.youtube.com/watch?v=')) {
                 // Youtube
-                message.url = page_url;
-                message.referrer = page_url;
+                message.URL = page_url;
+                message.Referer = page_url;
                 current_browser.cookies.getAll({ 'url': extractRootURL(page_url) }, parseCookies);
             } else {
                 // Other videos
@@ -197,13 +196,13 @@ function createContextMenus() {
                     var urls = Array.from(media_set);
                     var no_or_urls = urls.length;
                     if (no_or_urls == 1) {
-                        message.url = urls[0];
-                        message.referrer = page_url;
+                        message.URL = urls[0];
+                        message.Referer = page_url;
                         current_browser.cookies.getAll({ 'url': extractRootURL(page_url) }, parseCookies);
                     } else if (no_or_urls > 1) {
-                        message.url = urls.join('\n');
-                        message.referrer = page_url;
-                        message.batch = true;
+                        message.URL = urls.join('\n');
+                        message.Referer = page_url;
+                        message.Batch = true;
                         current_browser.cookies.getAll({ 'url': extractRootURL(page_url) }, parseCookies);
                     }
                 }
@@ -249,16 +248,16 @@ function setDownloadHooks() {
             id: downloadItem.id
         });
 
-        message.url = url;
-        message.fileName = unescape(downloadItem['filename']).replace(/\"/g, "");
+        message.URL = url;
+        message.FileName = unescape(downloadItem['filename']).replace(/\"/g, "");
         message.fileSize = fileSize;
-        message.referrer = downloadItem['referrer'];
+        message.Referer = downloadItem['referrer'];
         current_browser.cookies.getAll({ 'url': extractRootURL(url) }, parseCookies);
     });
 
     current_browser.webRequest.onBeforeRequest.addListener(function(details) {
         if (details.method === 'POST') {
-            message.postData = postParams(details.requestBody.formData);
+            message.PostData = postParams(details.requestBody.formData);
         }
         return {
             requestHeaders: details.requestHeaders
@@ -282,7 +281,7 @@ function setDownloadHooks() {
         requestList[currRequest].id = details.requestId;
         for (var i = 0; i < details.requestHeaders.length; ++i) {
             if (details.requestHeaders[i].name.toLowerCase() === 'user-agent') {
-                message.useragent = details.requestHeaders[i].value;
+                message.UserAgent = details.requestHeaders[i].value;
             } else if (details.requestHeaders[i].name.toLowerCase() === 'referer') {
                 requestList[currRequest].referrer = details.requestHeaders[i].value;
             } else if (details.requestHeaders[i].name.toLowerCase() === 'cookie') {
@@ -307,6 +306,7 @@ function setDownloadHooks() {
     ]);
     current_browser.webRequest.onHeadersReceived.addListener(function(details) {
 
+
         if (ugetWrapperNotFound) { // uget-chrome-wrapper not installed
             return {
                 responseHeaders: details.responseHeaders
@@ -326,14 +326,14 @@ function setDownloadHooks() {
         }
 
         var interruptDownload = false;
-        message.url = details.url;
+        message.URL = details.url;
         var contentType = "";
 
         for (var i = 0; i < details.responseHeaders.length; ++i) {
             if (details.responseHeaders[i].name.toLowerCase() == 'content-length') {
                 message.fileSize = details.responseHeaders[i].value;
                 var fileSize = parseInt(message.fileSize);
-                if (fileSize < minFileSizeToInterrupt && !isWhiteListed(message.url)) {
+                if (fileSize < minFileSizeToInterrupt && !isWhiteListed(message.URL)) {
                     return {
                         responseHeaders: details.responseHeaders
                     };
@@ -341,8 +341,8 @@ function setDownloadHooks() {
             } else if (details.responseHeaders[i].name.toLowerCase() == 'content-disposition') {
                 disposition = details.responseHeaders[i].value;
                 if (disposition.lastIndexOf('filename') != -1) {
-                    message.fileName = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)[1];
-                    message.fileName = unescape(message.fileName).replace(/\"/g, "");
+                    message.FileName = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)[1];
+                    message.FileName = unescape(message.FileName).replace(/\"/g, "");
                     interruptDownload = true;
                 }
             } else if (details.responseHeaders[i].name.toLowerCase() == 'content-type') {
@@ -371,15 +371,15 @@ function setDownloadHooks() {
             }
             for (var j = 0; j < 3; j++) {
                 if (details.requestId == requestList[j].id && requestList[j].id != "") {
-                    message.referrer = requestList[j].referrer;
-                    message.cookies = requestList[j].cookies;
+                    message.Referer = requestList[j].referrer;
+                    message.Cookies = requestList[j].cookies;
                     break;
                 }
             }
             if (details.method != "POST") {
-                message.postData = '';
+                message.PostData = '';
             }
-            current_browser.cookies.getAll({ 'url': extractRootURL(message.url) }, parseCookies);
+            current_browser.cookies.getAll({ 'url': extractRootURL(message.URL) }, parseCookies);
             var scheme = /^https/.test(details.url) ? 'https' : 'http';
             if (chromeVersion >= 35 || firefoxVersion >= 51) {
                 return {
@@ -428,13 +428,33 @@ function setDownloadHooks() {
     ]);
 }
 
+/**
+ * Check the TAB URL and enable download_media_with_uget if the page is Youtube
+ * @param {*int} tabId 
+ */
+function checkForYoutube(tabId, disableIfNot) {
+    current_browser.tabs.get(tabId, function(tab) {
+        isYoutube = tab['url'] && tab['url'].includes('/www.youtube.com/watch?v=')
+        if (isYoutube) {
+            current_browser.contextMenus.update("download_media_with_uget", { enabled: true });
+        } else if (disableIfNot) {
+            current_browser.contextMenus.update("download_media_with_uget", { enabled: false });
+        }
+    });
+}
 
 /**
  * Grab videos and add them to mediasInTab.
  */
 function enableVideoGrabber() {
     current_browser.tabs.onActivated.addListener(function(activeInfo) {
-        current_browser.contextMenus.update("download_media_with_uget", { enabled: mediasInTab[activeInfo['tabId']] != undefined });
+        if (mediasInTab[activeInfo['tabId']] != undefined) {
+            // Media already detected
+            current_browser.contextMenus.update("download_media_with_uget", { enabled: true });
+        } else {
+            // Check for Youtube
+            checkForYoutube(activeInfo['tabId'], true);
+        }
     });
 
     current_browser.tabs.onRemoved.addListener(function(tabId, removeInfo) {
@@ -448,12 +468,14 @@ function enableVideoGrabber() {
             // Loading a new page
             delete mediasInTab[tabId];
         }
+        // Check for Youtube
+        checkForYoutube(tabId, false);
     });
 
     current_browser.webRequest.onResponseStarted.addListener(function(details) {
         content_url = details['url'];
         type = details['type'];
-        if (type === 'media' || content_url.includes('mp4') || content_url.includes('www.youtube.com/watch?v=')) {
+        if (type === 'media' || content_url.includes('mp4')) {
             tabId = details['tabId'];
             mediaSet = mediasInTab[tabId];
             if (mediaSet == undefined) {
@@ -468,7 +490,6 @@ function enableVideoGrabber() {
             '<all_urls>'
         ],
         types: [
-            'main_frame',
             'media',
             'object'
         ]
@@ -484,8 +505,8 @@ function sendMessageToHost(message) {
         clearMessage();
         ugetWrapperNotFound = (response == null);
         if (!ugetWrapperNotFound && !ugetChromeWrapperVersion) {
-            ugetChromeWrapperVersion = response.version;
-            ugetVersion = response.uget;
+            ugetChromeWrapperVersion = response.Version;
+            ugetVersion = response.Uget;
         }
     });
 }
@@ -507,13 +528,13 @@ function getState() {
  * Clear the message.
  */
 function clearMessage() {
-    message.url = '';
-    message.cookies = '';
-    message.fileName = '';
+    message.URL = '';
+    message.Cookies = '';
+    message.FileName = '';
     message.fileSize = '';
-    message.referrer = '';
-    message.useragent = '';
-    message.batch = false;
+    message.Referer = '';
+    message.UserAgent = '';
+    message.Batch = false;
 }
 
 /**
@@ -555,7 +576,7 @@ function parseCookies(cookies_arr) {
         cookies += cookies_arr[i].value;
         cookies += '\n';
     }
-    message.cookies = cookies;
+    message.Cookies = cookies;
     sendMessageToHost(message);
 }
 

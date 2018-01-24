@@ -101,8 +101,8 @@ def download_all_links(data):
     """
     Extract all links from the html page and download them.
     """
-    urls = data['url']
-    cookie = data['cookies']
+    urls = data['URL']
+    cookie = data['Cookies']
     try:
         logger.debug('Writing links to file')
         with open(urls_filepath, 'w') as url_file:
@@ -158,28 +158,28 @@ def read_message():
         logger.debug('Received message: ' + str(text))
 
         if text:
-            if not 'url' in text:
+            if not 'URL' in text:
                 uget_version = subprocess.Popen(
                     [UGET_COMMAND + " --version"], shell=True, stdout=subprocess.PIPE, universal_newlines=True).communicate()[0]
                 uget_version = uget_version.replace(
                     'uGet', '').replace('for GTK+', '').strip()
                 logger.debug('uGet version: ' + uget_version)
-                send_message('{"enable": true, "version": "' +
-                             VERSION + '", "uget": "' + uget_version + '"}')
+                send_message('{"Status": "Available", "Version": "' +
+                             VERSION + '", "Uget": "' + uget_version + '"}')
                 return
 
-            send_message('{"state": "accepted"}')
+            send_message('{"Status": "Available", "Version": "' + VERSION + '", "Uget": ""}')
             data = json.loads(text)
-            url = data['url']
+            url = data['URL']
 
             if url != "":
-                if data['batch']:
+                if data['Batch']:
                     download_all_links(data)
                     return
                 use_cookie_file = False
-                fileName = data['fileName']
-                cookie = data['cookies']
-                referer = data['referrer']
+                fileName = data['FileName']
+                cookie = data['Cookies']
+                referer = data['Referer']
                 command = [UGET_COMMAND]
                 if cookie:
                     try:
