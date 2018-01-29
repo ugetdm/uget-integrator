@@ -84,6 +84,73 @@
 !define StrRep "!insertmacro StrRep"
 !insertmacro Func_StrRep ""
 
+Function RIF
+  ClearErrors  ; want to be a newborn
+ 
+  Exch $0      ; REPLACEMENT
+  Exch
+  Exch $1      ; SEARCH_TEXT
+  Exch 2
+  Exch $2      ; SOURCE_FILE
+ 
+  Push $R0     ; SOURCE_FILE file handle
+  Push $R1     ; temporary file handle
+  Push $R2     ; unique temporary file name
+  Push $R3     ; a line to sar/save
+  Push $R4     ; shift puffer
+ 
+  IfFileExists $2 +1 RIF_error      ; knock-knock
+  FileOpen $R0 $2 "r"               ; open the door
+ 
+  GetTempFileName $R2               ; who's new?
+  FileOpen $R1 $R2 "w"              ; the escape, please!
+ 
+  RIF_loop:                         ; round'n'round we go
+    FileRead $R0 $R3                ; read one line
+    IfErrors RIF_leaveloop          ; enough is enough
+    RIF_sar:                        ; sar - search and replace
+      Push "$R3"                    ; (hair)stack
+      Push "$1"                     ; needle
+      Push "$0"                     ; blood
+      Call StrRep                   ; do the bartwalk
+      StrCpy $R4 "$R3"              ; remember previous state
+      Pop $R3                       ; gimme s.th. back in return!
+      StrCmp "$R3" "$R4" +1 RIF_sar ; loop, might change again!
+    FileWrite $R1 "$R3"             ; save the newbie
+  Goto RIF_loop                     ; gimme more
+ 
+  RIF_leaveloop:                    ; over'n'out, Sir!
+    FileClose $R1                   ; S'rry, Ma'am - clos'n now
+    FileClose $R0                   ; me 2
+ 
+    Delete "$2.old"                 ; go away, Sire
+    Rename "$2" "$2.old"            ; step aside, Ma'am
+    Rename "$R2" "$2"               ; hi, baby!
+ 
+    ClearErrors                     ; now i AM a newborn
+    Goto RIF_out                    ; out'n'away
+ 
+  RIF_error:                        ; ups - s.th. went wrong...
+    SetErrors                       ; ...so cry, boy!
+ 
+  RIF_out:                          ; your wardrobe?
+  Pop $R4
+  Pop $R3
+  Pop $R2
+  Pop $R1
+  Pop $R0
+  Pop $2
+  Pop $0
+  Pop $1
+ 
+FunctionEnd
+!macro _ReplaceInFile SOURCE_FILE SEARCH_TEXT REPLACEMENT
+  Push "${SOURCE_FILE}"
+  Push "${SEARCH_TEXT}"
+  Push "${REPLACEMENT}"
+  Call RIF
+!macroend
+
 ;--------------------------------
 ;Include Modern UI
 
@@ -147,28 +214,32 @@ Section "${_PROGRAM_NAME} (required)"
 	SetOutPath $INSTDIR
 
 	; Put the script
-	File "..\..\${_PROGRAM_NAME}\bin\${_PROGRAM_NAME}"
+	File "..\..\bin\${_PROGRAM_NAME}"
 
 	Rename $INSTDIR\${_PROGRAM_NAME} $INSTDIR\${_PROGRAM_NAME}.py
 
+  ReadRegStr $0 HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\uget.exe" ""
+  ${StrRep} $0 "$0" "\" "\\"
+  !insertmacro _ReplaceInFile "$INSTDIR\${_PROGRAM_NAME}.py" "UGET_COMMAND = 'uget-gtk'" "UGET_COMMAND = '$0'"
+
 	; Replace \ by \\ in the installation path
-	${StrRep} $0 "$INSTDIR" "\" "\\"
+	${StrRep} $1 "$INSTDIR" "\" "\\"
 	
 	; Put the ${_PROGRAM_NAME}.bat file
-	File "..\..\${_PROGRAM_NAME}\windows\${_PROGRAM_NAME}.bat"
+	File "${_PROGRAM_NAME}.bat"
 
 	; Update the com.ugetdm.chrome.json file
 	FileOpen $9 $INSTDIR\com.ugetdm.chrome.json w ;Opens a Empty File an fills it
-	FileWrite $9 '{"name":"com.ugetdm.chrome","description":"Integrate uGet with Google Chrome","path":"$0\\${_PROGRAM_NAME}.bat","type":"stdio","allowed_origins":["chrome-extension://efjgjleilhflffpbnkaofpmdnajdpepi/","chrome-extension://akcbnhoidebjpiefdkmaaicfgdpbnoac/"]}$\r$\n'
+	FileWrite $9 '{"name":"com.ugetdm.chrome","description":"Integrate uGet with Google Chrome","path":"$1\\${_PROGRAM_NAME}.bat","type":"stdio","allowed_origins":["chrome-extension://efjgjleilhflffpbnkaofpmdnajdpepi/","chrome-extension://akcbnhoidebjpiefdkmaaicfgdpbnoac/"]}$\r$\n'
 	FileClose $9 ;Closes the filled file
 
     ; Update the com.ugetdm.firefox.json file
 	FileOpen $9 $INSTDIR\com.ugetdm.firefox.json w ;Opens a Empty File an fills it
-	FileWrite $9 '{"name":"com.ugetdm.firefox","description":"Integrate uGet with Mozilla Firefox","path":"$0\\${_PROGRAM_NAME}.bat","type":"stdio","allowed_extensions":["uget-integration@slgobinath"]}$\r$\n'
+	FileWrite $9 '{"name":"com.ugetdm.firefox","description":"Integrate uGet with Mozilla Firefox","path":"$1\\${_PROGRAM_NAME}.bat","type":"stdio","allowed_extensions":["uget-integration@slgobinath"]}$\r$\n'
 	FileClose $9 ;Closes the filled file
 	
 	; Put the icon
-	File "uget-icon.ico"
+	File "icon.ico"
 
 	; Write the installation path into the registry
 	WriteRegStr HKLM SOFTWARE\${_PROGRAM_NAME} "Install_Dir" "$INSTDIR"
@@ -186,7 +257,7 @@ Section "${_PROGRAM_NAME} (required)"
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${_PROGRAM_NAME}" "URLInfoAbout" "http://ugetdm.com/about"
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${_PROGRAM_NAME}" "DisplayVersion" "${_VERSION}"
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${_PROGRAM_NAME}" "UninstallString" '"$INSTDIR\uninstall.exe"'
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${_PROGRAM_NAME}" "DisplayIcon" "$INSTDIR\uget-icon.ico,0"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${_PROGRAM_NAME}" "DisplayIcon" "$INSTDIR\icon.ico,0"
 	WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${_PROGRAM_NAME}" "NoModify" 1
 	WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${_PROGRAM_NAME}" "NoRepair" 1
 	WriteUninstaller "uninstall.exe"
@@ -212,7 +283,7 @@ Section "Uninstall"
 	Delete $INSTDIR\${_PROGRAM_NAME}.bat
 	Delete $INSTDIR\com.ugetdm.chrome.json
 	Delete $INSTDIR\com.ugetdm.firefox.json
-	Delete $INSTDIR\uget-icon.ico
+	Delete $INSTDIR\icon.ico
 	Delete $INSTDIR\uninstall.exe
 
 	; Remove directories used

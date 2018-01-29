@@ -34,7 +34,7 @@ from mimetypes import guess_extension
 
 cookie_filepath = join(tempfile.gettempdir(), 'uget_cookie')
 urls_filepath = join(tempfile.gettempdir(), 'uget_urls')
-UGET_COMMAND = "uget-gtk"
+UGET_COMMAND = 'uget-gtk'
 VERSION = "2.0.7"
 creation_flags = 0
 
@@ -50,7 +50,6 @@ if sys.platform == 'win32':
     import msvcrt
     msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
     msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
-    UGET_COMMAND = 'uget'
     # CREATE_BREAKAWAY_FROM_JOB
     creation_flags |= 0x01000000
 
