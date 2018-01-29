@@ -162,7 +162,7 @@ FunctionEnd
   !define _PROGRAM_NAME "uget-integrator"
 
   ;Name and file
-  Name "uGet Chrome Wrapper"
+  Name "uGet Integrator"
   OutFile "${_PROGRAM_NAME}_${_VERSION}.exe"
 
   ;Default installation folder
@@ -296,20 +296,31 @@ SectionEnd
 Function .onInit
  
   ReadRegStr $R0 HKLM \
+  "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\uget.exe" \
+  ""
+  StrCmp $R0 "" NoUget
+  IfFileExists $R0 0 NoUget
+
+  ReadRegStr $R1 HKLM \
   "Software\Microsoft\Windows\CurrentVersion\Uninstall\${_PROGRAM_NAME}" \
   "UninstallString"
-  StrCmp $R0 "" done
+  StrCmp $R1 "" Done
  
   MessageBox MB_OKCANCEL|MB_ICONEXCLAMATION \
   "${_PROGRAM_NAME} is already installed. $\n$\nClick `OK` to remove the \
   previous version or `Cancel` to cancel this upgrade." \
-  IDOK uninst
+  IDOK UninstallExistingVersion
   Abort
  
+NoUget:
+  MessageBox MB_OK|MB_ICONEXCLAMATION \
+  "${_PROGRAM_NAME} requires uGet Download Manager.$\nPlease install uGet using Windows installer before installing ${_PROGRAM_NAME}."
+  Abort
+
 ;Run the uninstaller
-uninst:
+UninstallExistingVersion:
   ClearErrors
-  Exec $R0
-done:
+  Exec $R1
+Done:
  
 FunctionEnd
