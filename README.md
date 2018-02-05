@@ -30,9 +30,8 @@ sudo sh install_uget_integrator.sh
 
 ### Windows
 
-1. Install [Python 3.4 or latest](https://www.python.org/downloads/)
-2. Install the latest uGet Download Manager using [Windows installer](https://github.com/ugetdm/uget-windows-installer/releases)
-3. Download and install the latest [uget-integrator_x.x.x.x.exe](https://github.com/ugetdm/uget-integrator/releases)
+1. Install the latest uGet Download Manager using [Windows installer](https://github.com/ugetdm/uget-windows-installer/releases)
+2. Download and install the latest [uget-integrator_x.x.x.x.exe](https://github.com/ugetdm/uget-integrator/releases)
 
 ## Known Issues
 

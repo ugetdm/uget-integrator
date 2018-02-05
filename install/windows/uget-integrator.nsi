@@ -225,6 +225,9 @@ Section "${_PROGRAM_NAME} (required)"
 	; Replace \ by \\ in the installation path
 	${StrRep} $1 "$INSTDIR" "\" "\\"
 	
+  ; Put Python
+	File /r "python-3.6.4"
+
 	; Put the ${_PROGRAM_NAME}.bat file
 	File "${_PROGRAM_NAME}.bat"
 

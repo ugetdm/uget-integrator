@@ -1,8 +1,3 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
-
 # C extensions
 *.so
 
@@ -96,4 +91,4 @@ ENV/
 # Visual Studio Code settings
 .vscode/
 
-*.exe
+uget-integrator_*.exe
