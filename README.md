@@ -30,8 +30,24 @@ sudo sh install_uget_integrator.sh
 
 ### Windows
 
+#### Recommended Method
+
 1. Install the latest uGet Download Manager using [Windows installer](https://github.com/ugetdm/uget-windows-installer/releases)
 2. Download and install the latest [uget-integrator_x.x.x.x.exe](https://github.com/ugetdm/uget-integrator/releases)
+
+#### Portable Method
+
+> **Note: Portable method involves manual configurations so it is only recommended for advanced users**
+
+1. Download and extract portable uGet Download Manager from [official website](http://www.ugetdm.com/downloads-windows)
+2. Download and extract the latest [uget-integrator-portable_x.x.x.x.zip](https://github.com/ugetdm/uget-integrator/releases)
+3. Open `uget-integrator\uget-integrator.py` in Notepad and replace `uget-gtk` in line no 37 by the absolute path pf `uget.exe`
+    Suppose you extracted uGet into `C:\uget` directory then line no 37 should look like this:
+    ```python
+    UGET_COMMAND = 'C:\\uget\\bin\\uget.exe'
+    ```
+    > Note that `\\` is used in place of `\`
+4. Execute `uget-integrator\config.bat` to create required configuration files and Registry entries
 
 ## Known Issues
 
