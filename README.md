@@ -23,7 +23,6 @@ sudo apt install uget-chrome-wrapper
 ### Other Linux
 
 ```
-sudo pip3 install urllib3
 wget https://raw.githubusercontent.com/ugetdm/uget-integrator/master/install/linux/install_uget_integrator.sh
 sudo sh install_uget_integrator.sh
 ```
@@ -41,7 +40,7 @@ sudo sh install_uget_integrator.sh
 
 1. Download and extract portable uGet Download Manager from [official website](http://www.ugetdm.com/downloads-windows)
 2. Download and extract the latest [uget-integrator-portable_x.x.x.x.zip](https://github.com/ugetdm/uget-integrator/releases)
-3. Open `uget-integrator\uget-integrator.py` in Notepad and replace `uget-gtk` in line no 37 by the absolute path pf `uget.exe`
+3. Open `uget-integrator\uget-integrator.py` in Notepad and replace `uget-gtk` in line no 37 by the absolute path of `uget.exe`
     Suppose you extracted uGet into `C:\uget` directory then line no 37 should look like this:
     ```python
     UGET_COMMAND = 'C:\\uget\\bin\\uget.exe'
