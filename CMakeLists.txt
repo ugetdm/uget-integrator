@@ -33,6 +33,7 @@ install(FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/install/windows/add_config.bat
     ${CMAKE_CURRENT_SOURCE_DIR}/install/windows/remove_config.bat
     ${CMAKE_CURRENT_SOURCE_DIR}/install/windows/uget-integrator.bat
+    ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE
     DESTINATION /
     COMPONENT win_portable
 )
