@@ -39,14 +39,14 @@ sudo sh install_uget_integrator.sh
 > **Note: Portable method involves manual configurations so it is only recommended for advanced users**
 
 1. Download and extract portable uGet Download Manager from [official website](http://www.ugetdm.com/downloads-windows)
-2. Download and extract the latest [uget-integrator-portable_x.x.x.x.zip](https://github.com/ugetdm/uget-integrator/releases)
+2. Download and extract the latest [uget-integrator_win_x.x.x.zip](https://github.com/ugetdm/uget-integrator/releases)
 3. Open `uget-integrator\uget-integrator.py` in Notepad and replace `uget-gtk` in line no 37 by the absolute path of `uget.exe`
     Suppose you extracted uGet into `C:\uget` directory then line no 37 should look like this:
     ```python
     UGET_COMMAND = 'C:\\uget\\bin\\uget.exe'
     ```
     > Note that `\\` is used in place of `\`
-4. Execute `uget-integrator\config.bat` to create required configuration files and Registry entries
+4. Execute `uget-integrator\add_config.bat` to create required configuration files and Registry entries
 
 ## Known Issues
 
@@ -69,6 +69,15 @@ Where `mwad0hks` is a random string so you may have a different folder name.
 If the above solution works but does not persist, solution provided in [#3](https://github.com/ugetdm/uget-integrator/issues/3) may give you a permanent solution.
 
 For more details, please check issues [#43](https://github.com/slgobinath/uget-chrome-wrapper/issues/43) and [#3](https://github.com/ugetdm/uget-integrator/issues/3).
+
+
+## Build Packages
+
+```bash
+mkdir build
+cd build
+rm -rf *; cmake ..; make zip_package deb_package
+```
 
 ## License
 
