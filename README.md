@@ -40,12 +40,33 @@ sudo sh install_uget_integrator.sh
 
 1. Download and extract portable uGet Download Manager from [official website](http://www.ugetdm.com/downloads-windows)
 2. Download and extract the latest [uget-integrator_win_x.x.x.zip](https://github.com/ugetdm/uget-integrator/releases)
-3. Open `uget-integrator\uget-integrator.py` in Notepad and replace `uget-gtk` in line no 37 by the absolute path of `uget.exe`
-    Suppose you extracted uGet into `C:\uget` directory then line no 37 should look like this:
+3. Open `uget-integrator\uget-integrator.py` in Notepad and replace `uget-gtk` in [line no 38](https://github.com/ugetdm/uget-integrator/blob/master/bin/uget-integrator#L38) by the absolute path of `uget.exe`
+    Suppose you extracted uGet into `C:\uget` directory then line no 38 should look like this:
     ```python
-    UGET_COMMAND = 'C:\\uget\\bin\\uget.exe'
+    UGET_COMMAND = "C:\\uget\\bin\\uget.exe"
     ```
     > Note that `\\` is used in place of `\`
+
+    Relative path should work without any problems. However, we recommend to use relative paths in the following format to avoid *unexpected* runtime problems. In this format, you need to replace `"..\\uget\\bin\\uget.exe"` by the actual relative path of `uget.exe`.
+    ```python
+    UGET_COMMAND = join(os.path.realpath(__file__), "..\\uget\\bin\\uget.exe")
+    ```
+    Above example assumes the following folder structure:
+    ```
+    .
+    |- uget-integrator
+        |- add_config.bat
+        |- LICENSE
+        |- remove_config.bat
+        |- uget-integrator.bat
+        |- uget-integrator.py
+        |- python-3.6.4
+    |- uget
+        |- bin
+            |- uget.exe
+            |- other files
+        |- other files and folders
+    ```
 4. Execute `uget-integrator\add_config.bat` to create required configuration files and Registry entries
 
 ## Known Issues
@@ -73,6 +94,7 @@ For more details, please check issues [#43](https://github.com/slgobinath/uget-c
 
 ## Build Packages
 
+These commands are only for the developer to automate package creations.
 ```bash
 mkdir build
 cd build
