@@ -207,7 +207,7 @@ function(make_nsis_target COMPONENT)
     endif()
 
     set(TMP_PACKAGE_DIR "${CMAKE_BINARY_DIR}/${TMP_COMPONENT}/${CMAKE_PROJECT_NAME}")
-    set(PACKAGE_FILENAME "${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}_win_${VERSION}.exe")
+    set(PACKAGE_FILENAME "${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}_win_${VERSION}_installer.zip")
 
     # Build package target for component
     add_custom_target(nsis_package${COMPONENT}
@@ -217,7 +217,7 @@ function(make_nsis_target COMPONENT)
         COMMAND make DESTDIR=${TMP_PACKAGE_DIR} install${COMPONENT}
         COMMAND mv ${TMP_PACKAGE_DIR}/uget-integrator ${TMP_PACKAGE_DIR}/uget-integrator.py
         COMMAND ${CMAKE_COMMAND} -E chdir ${TMP_PACKAGE_DIR}/${EMBEDDABLE_PYTHON} ${CMAKE_COMMAND} -E tar "xf" ${CMAKE_BINARY_DIR}/${EMBEDDABLE_PYTHON}.zip -d
-        # COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/${TMP_COMPONENT} ${CMAKE_COMMAND} -E tar "cf" ${PACKAGE_FILENAME} --format=zip ${CMAKE_PROJECT_NAME}
+        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/${TMP_COMPONENT} ${CMAKE_COMMAND} -E tar "cf" ${PACKAGE_FILENAME} --format=zip ${CMAKE_PROJECT_NAME}
     )
 endfunction()
 
