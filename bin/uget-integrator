@@ -36,7 +36,7 @@ from mimetypes import guess_extension
 cookie_filepath = join(tempfile.gettempdir(), 'uget_cookie')
 urls_filepath = join(tempfile.gettempdir(), 'uget_urls')
 UGET_COMMAND = 'uget-gtk'
-VERSION = "1.0.0"
+VERSION = "0.0.1"
 creation_flags = 0
 
 logger = logging.getLogger()

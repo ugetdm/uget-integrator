@@ -158,7 +158,7 @@ FunctionEnd
 
 ;--------------------------------
 ;General
-  !define _VERSION "1.0.0.1"
+  !define _VERSION "0.0.1.0"
   !define _PROGRAM_NAME "uget-integrator"
 
   ;Name and file
