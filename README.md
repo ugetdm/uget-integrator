@@ -49,7 +49,7 @@ sudo sh install_uget_integrator.sh
 
     Relative path should work without any problems. However, we recommend to use relative paths in the following format to avoid *unexpected* runtime problems. In this format, you need to replace `"..\\uget\\bin\\uget.exe"` by the actual relative path of `uget.exe`.
     ```python
-    UGET_COMMAND = join(os.path.realpath(__file__), "..\\uget\\bin\\uget.exe")
+    UGET_COMMAND = join(os.path.dirname(os.path.realpath(__file__)), "..\\uget\\bin\\uget.exe")
     ```
     Above example assumes the following folder structure:
     ```
