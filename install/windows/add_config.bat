@@ -1,5 +1,8 @@
 @echo off
 
+@setlocal enableextensions
+@cd /d "%~dp0"
+
 SET "current_path=%~dp0uget-integrator.bat"
 SET "current_path=%current_path:\=/%"
 
