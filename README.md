@@ -76,7 +76,7 @@ For more details, please check issues [#43](https://github.com/slgobinath/uget-c
 ```bash
 mkdir build
 cd build
-rm -rf *; cmake ..; make zip_package deb_package
+rm -rf *; cmake ..; make deb_package zip_package nsis_package
 ```
 
 ## License

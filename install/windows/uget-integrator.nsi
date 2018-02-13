@@ -182,7 +182,7 @@ FunctionEnd
 ;--------------------------------
 ;Pages
 
-  !insertmacro MUI_PAGE_LICENSE "../../LICENSE"
+  !insertmacro MUI_PAGE_LICENSE "LICENSE"
   !insertmacro MUI_PAGE_DIRECTORY
   !insertmacro MUI_PAGE_INSTFILES
 
@@ -214,9 +214,7 @@ Section "${_PROGRAM_NAME} (required)"
 	SetOutPath $INSTDIR
 
 	; Put the script
-	File "..\..\bin\${_PROGRAM_NAME}"
-
-	Rename $INSTDIR\${_PROGRAM_NAME} $INSTDIR\${_PROGRAM_NAME}.py
+	File "${_PROGRAM_NAME}.py"
 
   ReadRegStr $0 HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\uget.exe" ""
   ${StrRep} $0 "$0" "\" "\\"

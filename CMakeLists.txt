@@ -38,9 +38,16 @@ install(FILES
     COMPONENT win_portable
 )
 
-set(DEB_PACKAGE_COMPONENTS "ubuntu")
-set(ZIP_PACKAGE_COMPONENTS "win_portable")
-
+# Windows installer
+install(FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/bin/uget-integrator
+    ${CMAKE_CURRENT_SOURCE_DIR}/install/windows/uget-integrator.nsi
+    ${CMAKE_CURRENT_SOURCE_DIR}/install/windows/uget-integrator.bat
+    ${CMAKE_CURRENT_SOURCE_DIR}/install/windows/icon.ico
+    ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE
+    DESTINATION /
+    COMPONENT win_installer
+)
 
 # Download Python
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/download_python.cmake
@@ -184,32 +191,53 @@ function(make_zip_target COMPONENT)
     )
 endfunction()
 
+# Making target for Windows installer
+function(make_nsis_target COMPONENT)
 
-# if build multiple packages
-if(DEB_PACKAGE_COMPONENTS)
-    foreach(COMP ${DEB_PACKAGE_COMPONENTS})
-        make_ubuntu_target(${COMP})
-        set(TMP_DEPENDS ${TMP_DEPENDS} "deb_package_${COMP}")
-    endforeach()
+    if( COMPONENT )
+        set(TMP_COMPONENT ${COMPONENT})
+        set(COMPONENT "_${COMPONENT}")
 
-    # common target for build all packages
-    add_custom_target(deb_package
-        DEPENDS ${TMP_DEPENDS}
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        # Install target for component
+        add_custom_target(install${COMPONENT}
+            COMMAND
+             "${CMAKE_COMMAND}" -DCMAKE_INSTALL_COMPONENT=${TMP_COMPONENT}
+             -P "${CMAKE_BINARY_DIR}/cmake_install.cmake"
+        )
+    endif()
+
+    set(TMP_PACKAGE_DIR "${CMAKE_BINARY_DIR}/${TMP_COMPONENT}/${CMAKE_PROJECT_NAME}")
+    set(PACKAGE_FILENAME "${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}_win_${VERSION}.exe")
+
+    # Build package target for component
+    add_custom_target(nsis_package${COMPONENT}
+        DEPENDS python_download
+        COMMAND rm -rf ${TMP_PACKAGE_DIR}
+        COMMAND mkdir -p ${TMP_PACKAGE_DIR}/${EMBEDDABLE_PYTHON}
+        COMMAND make DESTDIR=${TMP_PACKAGE_DIR} install${COMPONENT}
+        COMMAND mv ${TMP_PACKAGE_DIR}/uget-integrator ${TMP_PACKAGE_DIR}/uget-integrator.py
+        COMMAND ${CMAKE_COMMAND} -E chdir ${TMP_PACKAGE_DIR}/${EMBEDDABLE_PYTHON} ${CMAKE_COMMAND} -E tar "xf" ${CMAKE_BINARY_DIR}/${EMBEDDABLE_PYTHON}.zip -d
+        # COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/${TMP_COMPONENT} ${CMAKE_COMMAND} -E tar "cf" ${PACKAGE_FILENAME} --format=zip ${CMAKE_PROJECT_NAME}
     )
-endif()
+endfunction()
 
-if(ZIP_PACKAGE_COMPONENTS)
-    foreach(COMP ${ZIP_PACKAGE_COMPONENTS})
-        make_zip_target(${COMP})
-        set(TMP_DEPENDS ${TMP_DEPENDS} "zip_package_${COMP}")
-    endforeach()
+# Make Ubuntu target
+make_ubuntu_target("ubuntu")
+add_custom_target(deb_package
+    DEPENDS deb_package_ubuntu
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+)
 
-    # common target for build all packages
-    add_custom_target(zip_package
-        DEPENDS ${TMP_DEPENDS}
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    )
-else()
-    make_zip_target("")
-endif()
+# Make Windows portable zip
+make_zip_target("win_portable")
+add_custom_target(zip_package
+    DEPENDS zip_package_win_portable
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+)
+
+# Make Windows installer
+make_nsis_target("win_installer")
+add_custom_target(nsis_package
+    DEPENDS nsis_package_win_installer
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+)
