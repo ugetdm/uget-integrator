@@ -186,6 +186,8 @@ function(make_zip_target COMPONENT)
         COMMAND mkdir -p ${TMP_PACKAGE_DIR}/${EMBEDDABLE_PYTHON}
         COMMAND make DESTDIR=${TMP_PACKAGE_DIR} install${COMPONENT}
         COMMAND mv ${TMP_PACKAGE_DIR}/uget-integrator ${TMP_PACKAGE_DIR}/uget-integrator.py
+        # COMMAND sed -i "\"s/UGET_COMMAND = 'uget-gtk'/UGET_COMMAND = join(os.path.dirname(os.path.realpath(__file__)), \\\"..\\\\\\\\\\\\\\uGet\\\\\\\\\\\\\\bin\\\\\\\\\\\\\\uget.exe\\\")/g\"" ${TMP_PACKAGE_DIR}/uget-integrator.py
+        COMMAND sed -i "\"s/UGET_COMMAND = 'uget-gtk'/UGET_COMMAND = \\\"C:\\\\\\\\\\\\\\uGet\\\\\\\\\\\\\\bin\\\\\\\\\\\\\\uget.exe\\\"/g\"" ${TMP_PACKAGE_DIR}/uget-integrator.py
         COMMAND ${CMAKE_COMMAND} -E chdir ${TMP_PACKAGE_DIR}/${EMBEDDABLE_PYTHON} ${CMAKE_COMMAND} -E tar "xf" ${CMAKE_BINARY_DIR}/${EMBEDDABLE_PYTHON}.zip -d
         COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/${TMP_COMPONENT} ${CMAKE_COMMAND} -E tar "cf" ${PACKAGE_FILENAME} --format=zip ${CMAKE_PROJECT_NAME}
     )

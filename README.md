@@ -40,16 +40,16 @@ sudo sh install_uget_integrator.sh
 
 1. Download and extract portable uGet Download Manager from [official website](http://www.ugetdm.com/downloads-windows)
 2. Download and extract the latest [uget-integrator_win_x.x.x.zip](https://github.com/ugetdm/uget-integrator/releases)
-3. Open `uget-integrator\uget-integrator.py` in Notepad and replace `uget-gtk` in [line no 38](https://github.com/ugetdm/uget-integrator/blob/master/bin/uget-integrator#L38) by the absolute path of `uget.exe`
-    Suppose you extracted uGet into `C:\uget` directory then line no 38 should look like this:
+3. Open `uget-integrator\uget-integrator.py` in Notepad and replace `"C:\\uGet\\bin\\uget.exe"` in [line no 38](https://github.com/ugetdm/uget-integrator/blob/master/bin/uget-integrator#L38) by the absolute path of `uget.exe`
+    Suppose you extracted uGet into `C:\Program Files (x86)` directory then line no 38 should look like this:
     ```python
-    UGET_COMMAND = "C:\\uget\\bin\\uget.exe"
+    UGET_COMMAND = "C:\\Program Files (x86)\\uGet\\bin\\uget.exe"
     ```
     > Note that `\\` is used in place of `\`
 
-    Relative path should work without any problems. However, we recommend to use relative paths in the following format to avoid *unexpected* runtime problems. In this format, you need to replace `"..\\uget\\bin\\uget.exe"` by the actual relative path of `uget.exe`.
+    Relative path should work without any problems. However, we recommend to use relative paths in the following format to avoid *unexpected* runtime problems. In this format, you need to replace `"..\\uGet\\bin\\uget.exe"` by the actual relative path of `uget.exe`.
     ```python
-    UGET_COMMAND = join(os.path.dirname(os.path.realpath(__file__)), "..\\uget\\bin\\uget.exe")
+    UGET_COMMAND = join(os.path.dirname(os.path.realpath(__file__)), "..\\uGet\\bin\\uget.exe")
     ```
     Above example assumes the following folder structure:
     ```
@@ -61,7 +61,7 @@ sudo sh install_uget_integrator.sh
         |- uget-integrator.bat
         |- uget-integrator.py
         |- python-3.6.4
-    |- uget
+    |- uGet
         |- bin
             |- uget.exe
             |- other files
