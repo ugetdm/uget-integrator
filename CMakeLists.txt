@@ -155,7 +155,7 @@ function(make_ubuntu_target COMPONENT)
         COMMAND cat ${CMAKE_CURRENT_SOURCE_DIR}/copyright >> ${TMP_PACKAGE_DEB_DIR}/copyright
         COMMAND test -z "${DEB_PACKAGE${COMPONENT}_CONTROL_FILES}" || cp ${DEB_PACKAGE${COMPONENT}_CONTROL_FILES} -t ${TMP_PACKAGE_DEB_DIR}
         COMMAND make DESTDIR=${TMP_PACKAGE_DIR} install${COMPONENT}
-        COMMAND ${CMAKE_COMMAND} -E chdir ${TMP_PACKAGE_DIR} debuild
+        COMMAND ${CMAKE_COMMAND} -E chdir ${TMP_PACKAGE_DIR} debuild -S
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         VERBATIM
     )
