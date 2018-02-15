@@ -15,9 +15,9 @@ yaourt -S uget-chrome-wrapper
 ### Ubuntu & Linux Mint
 
 ```
-sudo add-apt-repository ppa:slgobinath/uget-chrome-wrapper
+sudo add-apt-repository ppa:uget-team/ppa
 sudo apt update
-sudo apt install uget-chrome-wrapper
+sudo apt install uget-integrator
 ```
 
 ### Other Linux
