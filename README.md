@@ -9,8 +9,14 @@ Integrate uGet Download Manager with Google Chrome, Chromium, Opera, Vivaldi and
 ### Arch
 
 ```
-yaourt -S uget-chrome-wrapper
+pacaur -S uget-integrator-chrome uget-integrator-chromium uget-integrator-opera uget-integrator-firefox
 ```
+
+> Vivaldi users must install `uget-integrator-chromium`
+
+Above packages bind `uget-integrator` with respective browsers. You can ignore a package if you do not have the browser or do not want to integrate it with uGet.
+
+For example, if you use Mozilla Firefox only, installing `uget-integrator-firefox` is enough.
 
 ### Ubuntu & Linux Mint
 
