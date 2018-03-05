@@ -113,13 +113,13 @@ def download_all_links(data):
                 with open(cookie_filepath, 'w') as cookie_file:
                     cookie_file.write(cookie)
                 use_cookie_file = True
-            except Exception as e:
+            except Exception:
                 pass
 
         if use_cookie_file:
             command.append("--http-cookie-file=" + cookie_filepath)
         # Pass the parameters to uGet
-        subprocess.call(command)
+        subprocess.Popen(command, creationflags=creation_flags).wait()
 
         if use_cookie_file:
             try:
