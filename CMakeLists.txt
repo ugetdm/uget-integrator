@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.5)
  
 PROJECT(uget-integrator)
 
-set(MAJOR_VERSION 0)
+set(MAJOR_VERSION 1)
 set(MINOR_VERSION 0)
-set(PATCH_VERSION 1)
+set(PATCH_VERSION 0)
 set(RELEASE_VERSION 1)
 set(VERSION ${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION})
 set(DESCRIPTION "Integrate uGet Download manager with Google Chrome, Chromium, Vivaldi, Opera and Firefox")

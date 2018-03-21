@@ -4,7 +4,7 @@ Integrate uGet Download Manager with Google Chrome, Chromium, Opera, Vivaldi and
 
 ## Installation
 
-> **NOTE:** uget-integrator is still under development. Please stick with [uget-chrome-wrapper](https://slgobinath.github.io/uget-chrome-wrapper/#installation) until new release.
+> After installing `uget-integrator`, install [uget-extension](https://github.com/ugetdm/uget-extension) and restart your browser.
 
 ### Arch
 
