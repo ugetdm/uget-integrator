@@ -11,7 +11,7 @@ set(DESCRIPTION "Integrate uGet Download manager with Google Chrome, Chromium, V
 set(HOME_PAGE "http://ugetdm.com/")
 set(UBUNTU_BUILD_TARGET "xenial")
 set(EMBEDDABLE_PYTHON "python-3.6.4")
-set(EMBEDDABLE_PYTHON_URL "https://www.python.org/ftp/python/3.6.4/python-3.6.4-embed-amd64.zip")
+set(EMBEDDABLE_PYTHON_URL "https://www.python.org/ftp/python/3.6.4/python-3.6.4-embed-win32.zip")
 set(EMBEDDABLE_PYTHON_MD5 "d2fb546fd4b189146dbefeba85e7266b")
 
 # Ubuntu
