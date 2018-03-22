@@ -24,7 +24,10 @@ Integrate uGet Download Manager with Google Chrome, Chromium, Opera, Vivaldi and
     - [Windows (Recommended method)](https://github.com/ugetdm/uget-integrator/wiki/Installation#recommended-method)
     - [Windows (Portable method)](https://github.com/ugetdm/uget-integrator/wiki/Installation#portable-method)
 
-2. Install [uget-extension](https://github.com/ugetdm/uget-extension) and restart your browser
+2. Install `uget-extension` and restart your browser
+    - [Google Chrome, Chromium & Vivaldi](https://chrome.google.com/webstore/detail/uget-integration/efjgjleilhflffpbnkaofpmdnajdpepi)
+    - [Mozilla Firefox](https://addons.mozilla.org/en-US/firefox/addon/ugetintegration/)
+    - [Opera](https://addons.opera.com/en/extensions/details/uget-integration)
 
 ## Known Issues
 
