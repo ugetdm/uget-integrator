@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Set default umask permissions
+umask 022
+
 # Get the latest version
 latest_release=$(curl -L -s -H 'Accept: application/json' https://github.com/ugetdm/uget-integrator/releases/latest)
 version=$(echo $latest_release | sed -e 's/.*"tag_name":"\([^"]*\)".*/\1/')
