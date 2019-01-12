@@ -49,6 +49,7 @@ EOF
 
 
 %files
+%license LICENSE
 %doc  README.install.urpmi
 %{_bindir}/%{name}
 %dir %{_sysconfdir}/chromium/native-messaging-hosts
