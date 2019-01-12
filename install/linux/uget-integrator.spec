@@ -9,7 +9,11 @@ Release:	1%{?dist}
 License:	GPLv3+
 Group:		Networking/File transfer
 URL:		https://github.com/ugetdm/uget-integrator
+
+%undefine _disable_source_fetch
 Source0:	https://github.com/ugetdm/%{srcname}/archive/v%{version}.tar.gz
+%define		SHA256SUM0 bbc85c32d94e2b6a21977c559f6e49cea9613028713df89e91327a23fef19fa9
+
 
 Requires:   python3
 Requires:   uget
@@ -23,6 +27,9 @@ uget-extension for your browser from your browser's
 extension site/page.
 
 %prep
+echo "%SHA256SUM0 %SOURCE0" | sha256sum -c -
+%autosetup -n %{srcname}-%{version}
+
 %build
 
 %install
