@@ -15,6 +15,7 @@ Source0:	https://github.com/ugetdm/%{srcname}/archive/v%{version}.tar.gz
 %define		SHA256SUM0 bbc85c32d94e2b6a21977c559f6e49cea9613028713df89e91327a23fef19fa9
 
 
+BuildArch: noarch
 Requires:   python3
 Requires:   uget
 
